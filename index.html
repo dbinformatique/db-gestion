@@ -1,0 +1,2534 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#21255C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>D&B Informatique — Gestion</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 188 188'%3E%3Crect width='188' height='188' rx='44' fill='%233E4CB8'/%3E%3Cg transform='translate(50,34) scale(1.06)'%3E%3Cpath d='M8 4 L8 92 L30 70 L46 108 L64 100 L48 63 L76 60 Z' fill='%23fff' stroke='%23fff' stroke-width='5' stroke-linejoin='round'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{
+  --encre:#21255C; --indigo:#3E4CB8; --indigo-d:#33409F; --rouge:#D62F26; --corail:#FFB4AD;
+  --gris:#5A6472; --pale:#ECEEFA; --ligne:#E2E5F5; --blanc:#fff; --fond:#F7F8FE;
+  --ok:#1E7A4B; --okbg:#E8F6EE; --warn:#B85C00; --warnbg:#FFF3E4; --dangerbg:#FDEEED;
+  --r:12px; --sh:0 1px 3px rgba(33,37,92,.08),0 8px 24px rgba(33,37,92,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:var(--fond);color:#1A1D33;font-size:15px;line-height:1.5;overflow-x:hidden}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+a{color:var(--indigo);text-decoration:none}
+
+/* ─────── structure ─────── */
+#app{display:flex;min-height:100%}
+#side{width:240px;background:var(--encre);color:#fff;flex:0 0 240px;position:fixed;inset:0 auto 0 0;
+  display:flex;flex-direction:column;z-index:40}
+#side .brand{padding:20px 18px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.12)}
+#side .brand svg{width:36px;height:36px;flex:0 0 auto;border-radius:9px}
+#side .brand b{font-size:19px;letter-spacing:-.5px;display:block;line-height:1}
+#side .brand b i{color:var(--corail);font-style:normal}
+#side .brand span{font-size:8.5px;letter-spacing:2.2px;color:#AEB7EA;display:block;margin-top:3px}
+#nav{flex:1;overflow-y:auto;padding:10px 8px}
+#nav a{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:9px;color:#C6CCF2;
+  font-size:14.5px;font-weight:500;margin-bottom:2px}
+#nav a .ic{width:20px;text-align:center;font-size:16px;flex:0 0 20px}
+#nav a .badge{margin-left:auto;background:var(--rouge);color:#fff;font-size:11px;font-weight:700;
+  min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 6px}
+#nav a:hover{background:rgba(255,255,255,.07);color:#fff}
+#nav a.on{background:var(--indigo);color:#fff;font-weight:600}
+#side .foot{padding:12px 16px;font-size:11px;color:#8F98D8;border-top:1px solid rgba(255,255,255,.12)}
+#main{flex:1;margin-left:240px;min-width:0;padding:0 0 40px}
+
+#topbar{position:sticky;top:0;z-index:30;background:rgba(247,248,254,.92);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--ligne);padding:14px 26px;display:flex;align-items:center;gap:14px}
+#topbar h1{font-size:21px;font-weight:800;color:var(--encre);letter-spacing:-.4px;flex:1;min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#burger{display:none}
+.wrap{padding:22px 26px;max-width:1280px}
+
+/* ─────── composants ─────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 16px;border-radius:9px;
+  font-weight:600;font-size:14px;background:var(--indigo);color:#fff;white-space:nowrap;transition:.15s}
+.btn:hover{background:var(--indigo-d)}
+.btn.sec{background:var(--blanc);color:var(--encre);border:1px solid var(--ligne)}
+.btn.sec:hover{background:var(--pale)}
+.btn.danger{background:var(--rouge)}
+.btn.sm{padding:7px 11px;font-size:13px;border-radius:8px}
+.btn.icon{padding:8px 10px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+
+.card{background:var(--blanc);border:1px solid var(--ligne);border-radius:var(--r);box-shadow:var(--sh);
+  margin-bottom:18px;overflow:hidden}
+.card>h3{font-size:13px;font-weight:800;letter-spacing:1.1px;color:var(--indigo);text-transform:uppercase;
+  padding:14px 18px;border-bottom:1px solid var(--ligne);background:#FBFCFF;display:flex;align-items:center;gap:10px}
+.card>h3 .r{margin-left:auto;font-weight:600;letter-spacing:0;text-transform:none;font-size:13px;color:var(--gris)}
+.card .body{padding:18px}
+.card .body.p0{padding:0}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:20px}
+.kpi{background:var(--blanc);border:1px solid var(--ligne);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);
+  border-top:3px solid var(--indigo)}
+.kpi.red{border-top-color:var(--rouge)} .kpi.ok{border-top-color:var(--ok)} .kpi.warn{border-top-color:var(--warn)}
+.kpi .lab{font-size:11.5px;font-weight:700;letter-spacing:.6px;color:var(--gris);text-transform:uppercase}
+.kpi .val{font-size:25px;font-weight:800;color:var(--encre);letter-spacing:-.8px;margin:6px 0 2px;line-height:1.1}
+.kpi .sub{font-size:12px;color:var(--gris)}
+
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:11.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--gris);
+  padding:11px 14px;border-bottom:1px solid var(--ligne);background:#FBFCFF;white-space:nowrap;position:sticky;top:0}
+td{padding:12px 14px;border-bottom:1px solid #F0F2FB;vertical-align:middle}
+tbody tr:hover{background:#FBFCFF}
+tbody tr.clic{cursor:pointer}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.mini{font-size:12.5px;color:var(--gris)}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.pill.gris{background:var(--pale);color:var(--encre)}
+.pill.ok{background:var(--okbg);color:var(--ok)}
+.pill.warn{background:var(--warnbg);color:var(--warn)}
+.pill.red{background:var(--dangerbg);color:#A8231C}
+.pill.blue{background:#E4E8FB;color:var(--indigo)}
+
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12.5px;font-weight:700;color:var(--encre);margin-bottom:5px}
+.field .hint{font-size:11.5px;color:var(--gris);margin-top:4px}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--ligne);border-radius:9px;background:var(--blanc);
+  outline:none;transition:.15s}
+input:focus,select:focus,textarea:focus{border-color:var(--indigo);box-shadow:0 0 0 3px rgba(62,76,184,.12)}
+textarea{min-height:80px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 14px}
+
+#modal{position:fixed;inset:0;background:rgba(20,22,50,.55);backdrop-filter:blur(3px);z-index:100;
+  display:none;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}
+#modal.on{display:flex}
+#modal .box{background:var(--blanc);border-radius:16px;width:100%;max-width:760px;box-shadow:0 24px 70px rgba(0,0,0,.3);
+  margin:auto}
+#modal .box.wide{max-width:1000px}
+#modal .hd{padding:18px 22px;border-bottom:1px solid var(--ligne);display:flex;align-items:center;gap:12px}
+#modal .hd h2{font-size:18px;font-weight:800;color:var(--encre);flex:1}
+#modal .bd{padding:22px;max-height:calc(100vh - 220px);overflow-y:auto}
+#modal .ft{padding:16px 22px;border-top:1px solid var(--ligne);display:flex;gap:10px;justify-content:flex-end;background:#FBFCFF;
+  border-radius:0 0 16px 16px}
+
+.empty{text-align:center;padding:44px 20px;color:var(--gris)}
+.empty .big{font-size:40px;margin-bottom:10px;opacity:.4}
+.empty p{margin-bottom:16px;font-size:14px}
+
+.toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.toolbar input[type=search]{max-width:280px}
+.toolbar .sp{flex:1}
+
+.lignes th{background:var(--pale)}
+.lignes input{padding:8px 10px;border-radius:7px}
+.lignes td{padding:6px 5px;border-bottom:1px solid #F4F5FC}
+
+.alert{padding:13px 16px;border-radius:10px;font-size:13.5px;margin-bottom:16px;border-left:4px solid}
+.alert.info{background:var(--pale);border-color:var(--indigo);color:#22254D}
+.alert.warn{background:var(--warnbg);border-color:var(--warn);color:#6B3A00}
+.alert.red{background:var(--dangerbg);border-color:var(--rouge);color:#8A1F18}
+.alert.ok{background:var(--okbg);border-color:var(--ok);color:#14522F}
+.alert b{font-weight:800}
+
+.bar{height:8px;background:var(--pale);border-radius:5px;overflow:hidden;margin-top:7px}
+.bar i{display:block;height:100%;background:var(--indigo);border-radius:5px}
+.bar i.ok{background:var(--ok)} .bar i.red{background:var(--rouge)} .bar i.warn{background:var(--warn)}
+
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:26px;background:var(--encre);color:#fff;
+  padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:200;opacity:0;pointer-events:none;
+  transition:.25s;box-shadow:0 10px 30px rgba(0,0,0,.3);max-width:90vw;text-align:center}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(-6px)}
+
+/* ─────── mobile ─────── */
+#scrim{display:none;position:fixed;inset:0;background:rgba(20,22,50,.5);z-index:35}
+@media(max-width:860px){
+  #side{transform:translateX(-100%);transition:transform .22s;width:262px;flex-basis:262px}
+  body.menu #side{transform:none}
+  body.menu #scrim{display:block}
+  #main{margin-left:0}
+  #burger{display:inline-flex;font-size:22px;color:var(--encre);padding:2px 4px}
+  #topbar{padding:12px 14px}
+  #topbar h1{font-size:18px}
+  .wrap{padding:16px 14px 90px}
+  .kpis{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+  .kpi{padding:13px 14px}
+  .kpi .val{font-size:21px}
+  .grid2,.grid3{grid-template-columns:1fr}
+  #modal{padding:0}
+  #modal .box{border-radius:16px 16px 0 0;margin:auto 0 0;max-width:100%}
+  #modal .bd{max-height:calc(100vh - 190px)}
+  #modal .ft{border-radius:0}
+  table{font-size:13.5px}
+  th,td{padding:10px 10px}
+}
+
+/* ─────── impression ─────── */
+#print{display:none}
+@media print{
+  #side,#topbar,#scrim,#modal,#toast,#main{display:none!important}
+  #print{display:block!important;padding:0;margin:0}
+  @page{size:A4;margin:14mm 14mm 16mm}
+  body{background:#fff;font-size:11px}
+}
+.doc{max-width:182mm;color:#1A1D33}
+.doc .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:16mm}
+.doc .hd .lg{display:flex;align-items:center;gap:8px}
+.doc .hd .lg svg{width:15mm;height:15mm}
+.doc .hd .lg b{font-size:22px;font-weight:800;color:var(--encre);letter-spacing:-1px;display:block;line-height:1}
+.doc .hd .lg b i{color:var(--rouge);font-style:normal}
+.doc .hd .lg span{font-size:7px;letter-spacing:2.4px;color:var(--indigo);font-weight:700;display:block;margin-top:2px}
+.doc .hd .rr{text-align:right}
+.doc .hd .rr .t{font-size:24px;font-weight:800;color:var(--encre);letter-spacing:3px;margin-bottom:6px}
+.doc .hd .rr div{font-size:10px;color:var(--gris)}
+.doc .hd .rr div b{color:var(--encre)}
+.doc .parties{display:flex;gap:6mm;margin-bottom:8mm}
+.doc .parties>div{flex:1;padding:4mm;border-radius:2mm;font-size:10px;line-height:1.55}
+.doc .parties .em{background:var(--pale)}
+.doc .parties .cl{border:.4mm solid var(--encre)}
+.doc .parties .lb{font-size:7.5px;font-weight:800;letter-spacing:1.6px;color:var(--gris);margin-bottom:2mm}
+.doc .parties b{color:var(--encre);font-size:11px}
+.doc h4{font-size:9px;font-weight:800;letter-spacing:1.6px;background:var(--encre);color:#fff;padding:2mm 3mm;margin:6mm 0 3mm}
+.doc table{font-size:10px;width:100%}
+.doc th{background:var(--encre);color:#fff;padding:2.4mm 2.6mm;font-size:9px;position:static}
+.doc td{padding:2.4mm 2.6mm;border-bottom:.25mm solid var(--ligne)}
+.doc .tot td{background:var(--pale);font-weight:800;color:var(--encre)}
+.doc .tot.big td{background:var(--encre);color:#fff;font-size:13px}
+.doc .mentions{font-size:9px;color:var(--gris);line-height:1.7;margin-top:6mm}
+.doc .mentions b{color:var(--encre)}
+.doc .sign{display:flex;gap:6mm;margin-top:10mm}
+.doc .sign>div{flex:1;border-top:.5mm solid var(--encre);padding-top:3mm;font-size:9.5px;min-height:26mm}
+.doc .sign>div:last-child{border-top-color:var(--rouge)}
+.doc .sign b{display:block;color:var(--encre);margin-bottom:2mm;font-size:10.5px}
+.doc .pied{margin-top:8mm;padding-top:3mm;border-top:.3mm solid var(--ligne);font-size:8px;color:var(--gris);text-align:center;line-height:1.7}
+
+/* ── écran de verrouillage ── */
+body.bloque #app,body.bloque #modal,body.bloque #toast{display:none!important}
+#verrou{display:none;position:fixed;inset:0;z-index:400;background:linear-gradient(150deg,#33409F 0%,#21255C 68%);
+  align-items:center;justify-content:center;padding:24px}
+#verrou.on{display:flex}
+#verrou .vbox{width:100%;max-width:380px;text-align:center;color:#fff}
+#verrou .vlogo{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:34px}
+#verrou .vlogo svg{width:52px;height:52px;border-radius:13px}
+#verrou .vlogo b{display:block;font-size:27px;font-weight:900;letter-spacing:-1px;line-height:1}
+#verrou .vlogo i{font-style:normal;color:#FFB4AD}
+#verrou .vlogo span{display:block;font-size:9px;font-weight:700;letter-spacing:4.4px;color:#AEB7EA;margin-top:3px}
+#verrou .vlogo>div{text-align:left}
+#verrou h2{font-size:20px;font-weight:800;margin-bottom:8px}
+#verrou .vp{font-size:14px;color:#C9CFF4;line-height:1.6;margin-bottom:22px}
+#verrou input{width:100%;padding:14px 16px;border-radius:11px;border:1px solid rgba(255,255,255,.28);
+  background:rgba(255,255,255,.1);color:#fff;font-size:17px;text-align:center;letter-spacing:3px}
+#verrou input::placeholder{color:#9AA3D8;letter-spacing:0}
+#verrou input:focus{outline:none;border-color:#FFB4AD;background:rgba(255,255,255,.16)}
+#verrou .btn{width:100%;margin-top:14px;justify-content:center;background:var(--rouge);color:#fff;border:0}
+#verrou .btn:disabled{opacity:.5}
+#verrou .verr{margin-top:14px;background:rgba(214,47,38,.22);border:1px solid rgba(255,180,173,.45);
+  border-radius:10px;padding:10px 14px;font-size:13.5px;color:#FFD9D5}
+#verrou .vaide{margin-top:26px;font-size:12.5px;color:#9AA3D8;line-height:1.65}
+#verrou .vaide a{color:#FFB4AD}
+.puce{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:4px 11px;border-radius:20px;
+  background:var(--pale);color:var(--indigo);white-space:nowrap}
+.puce::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.puce.ok{background:#E8F6EE;color:#1E7A4B}
+.puce.red{background:#FDEEED;color:#A8231C}
+.puce.blue{background:var(--pale);color:var(--indigo)}
+.puce.gris{background:#EEF0F5;color:var(--gris)}
+
+/* ─────── visites terrain ─────── */
+.onglets{display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--ligne)}
+.onglets button{padding:10px 16px;font-weight:700;font-size:14px;color:var(--gris);border-bottom:3px solid transparent;margin-bottom:-1px}
+.onglets button.on{color:var(--encre);border-bottom-color:var(--indigo)}
+.zone{font-size:12px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;color:var(--indigo);margin:20px 0 8px}
+.lst{display:flex;flex-direction:column;gap:10px}
+.lc{background:var(--blanc);border:1px solid var(--ligne);border-radius:var(--r);padding:13px 15px;display:flex;gap:14px;align-items:flex-start;box-shadow:var(--sh)}
+.lc .tx{flex:1;min-width:0}
+.lc .tt{font-weight:700;color:var(--encre);overflow-wrap:anywhere}
+.lc .mt{font-size:12.5px;color:var(--gris);margin-top:3px;overflow-wrap:anywhere}
+.lc .ac{flex:0 0 auto;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.st{font-size:12px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--indigo);margin:22px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--ligne)}
+details.mm+input+.st{margin-top:8px}
+.cbs{display:flex;flex-wrap:wrap;gap:10px 22px;margin-bottom:14px}
+.cb{display:inline-flex;align-items:center;gap:9px;font-size:14px;cursor:pointer}
+.cb input{width:20px;height:20px;padding:0;flex:0 0 20px;accent-color:var(--indigo)}
+details.mm{border:1px solid var(--ligne);border-radius:10px;background:#FBFCFF;margin-bottom:10px}
+details.mm>summary{cursor:pointer;padding:12px 14px;font-weight:700;color:var(--encre);font-size:14.5px;list-style:none}
+details.mm>summary::-webkit-details-marker{display:none}
+details.mm>summary::after{content:"+";float:right;color:var(--indigo);font-weight:800}
+details.mm[open]>summary::after{content:"\2212"}
+details.mm .mb{padding:0 14px 14px;font-size:14.5px;line-height:1.65}
+.mp{font-size:14.5px;line-height:1.7;margin-bottom:10px}
+.pitch{background:var(--encre);color:#fff;border-radius:var(--r);padding:20px 22px;margin-bottom:18px;box-shadow:var(--sh)}
+.pitch .pt{font-size:12px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--corail);margin-bottom:12px}
+.pitch p{font-size:16px;line-height:1.7;margin-bottom:10px}
+.pitch p:last-child{margin-bottom:0}
+ul.regles,ol.regles{padding-left:20px;font-size:14.5px;line-height:1.7}
+ul.regles li,ol.regles li{margin-bottom:6px}
+@media(max-width:860px){.lc{flex-direction:column;gap:10px}.lc .ac{flex-direction:row;align-items:center;width:100%;justify-content:space-between}}
+</style>
+</head>
+<body>
+<div id="verrou"></div>
+<div id="scrim" onclick="document.body.classList.remove('menu')"></div>
+<div id="app">
+  <aside id="side">
+    <div class="brand">
+      <svg viewBox="0 0 188 188"><rect width="188" height="188" rx="44" fill="#3E4CB8"/>
+        <g transform="translate(50,34) scale(1.06)"><path d="M8 4 L8 92 L30 70 L46 108 L64 100 L48 63 L76 60 Z" fill="#fff" stroke="#fff" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/></g></svg>
+      <div><b>D<i>&amp;</i>B</b><span>INFORMATIQUE</span></div>
+    </div>
+    <nav id="nav"></nav>
+    <div class="foot">Vos données vous appartiennent.<br>Exportez une sauvegarde chaque vendredi.</div>
+  </aside>
+  <main id="main">
+    <div id="topbar">
+      <button id="burger" onclick="document.body.classList.toggle('menu')">☰</button>
+      <h1 id="titre">Tableau de bord</h1>
+      <span id="badgeSync" class="puce gris">Local</span>
+      <div id="actions"></div>
+    </div>
+    <div class="wrap" id="vue"></div>
+  </main>
+</div>
+<div id="modal"><div class="box" id="mbox"></div></div>
+<div id="toast"></div>
+<div id="print"></div>
+<script>
+/* ══════════════════════════════════════════════════════════════
+   D&B INFORMATIQUE — Sécurité, verrouillage et synchronisation
+   Ce module est chargé AVANT le reste de l'application.
+   ══════════════════════════════════════════════════════════════ */
+'use strict';
+
+const K_DATA = 'dbi_gestion_v1';
+const K_SEC  = 'dbi_sec_v1';
+const K_FB   = 'dbi_fb_v1';
+const K_SYNC = 'dbi_sync_v1';
+const K_APP  = 'dbi_appareil_v1';
+
+const SEC_DEFAUT = {
+  mode: 'aucun',        // 'aucun' | 'code'
+  iter: 210000,
+  sel: '',
+  autoLock: 15,         // minutes ; 0 = jamais
+  essais: 0,
+  bloqueJusqu: 0,
+  cloud: false          // synchronisation activée
+};
+
+let SEC = secLire();
+let CLE = null;           // clé AES-GCM en mémoire uniquement
+let DEVERROUILLE = false;
+let derniereActivite = Date.now();
+
+function secLire() {
+  try { return Object.assign({}, SEC_DEFAUT, JSON.parse(localStorage.getItem(K_SEC) || '{}')); }
+  catch (e) { return Object.assign({}, SEC_DEFAUT); }
+}
+function secEcrire() { try { localStorage.setItem(K_SEC, JSON.stringify(SEC)); } catch (e) {} }
+
+function idAppareil() {
+  let a = localStorage.getItem(K_APP);
+  if (!a) { a = Math.random().toString(36).slice(2, 10) + Date.now().toString(36); localStorage.setItem(K_APP, a); }
+  return a;
+}
+function nomAppareil() {
+  const ua = navigator.userAgent;
+  if (/iPhone|iPad/.test(ua)) return 'iPhone / iPad';
+  if (/Android/.test(ua)) return 'Android';
+  if (/Windows/.test(ua)) return 'Windows';
+  if (/Mac/.test(ua)) return 'Mac';
+  return 'Ordinateur';
+}
+
+/* ───────────────────── primitives cryptographiques ───────────────────── */
+const _enc = new TextEncoder(), _dec = new TextDecoder();
+const b64 = buf => { const u = new Uint8Array(buf); let s = ''; for (let i = 0; i < u.length; i++) s += String.fromCharCode(u[i]); return btoa(s); };
+const deb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+function cryptoDispo() { return !!(window.crypto && window.crypto.subtle && window.crypto.subtle.deriveKey); }
+
+async function deriverCle(code, selB64, iter) {
+  const km = await crypto.subtle.importKey('raw', _enc.encode(code), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: deb64(selB64), iterations: iter, hash: 'SHA-256' },
+    km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+async function chiffrer(cle, texte) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cle, _enc.encode(texte));
+  return { chiffre: true, v: 2, iv: b64(iv), ct: b64(ct) };
+}
+async function dechiffrer(cle, o) {
+  const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: deb64(o.iv) }, cle, deb64(o.ct));
+  return _dec.decode(pt);
+}
+
+/* ───────────────────── lecture / écriture du magasin ───────────────────── */
+function estChiffre() {
+  try { const o = JSON.parse(localStorage.getItem(K_DATA) || 'null'); return !!(o && o.chiffre); }
+  catch (e) { return false; }
+}
+async function donneesLire() {
+  const brut = localStorage.getItem(K_DATA);
+  if (!brut) return null;
+  let o;
+  try { o = JSON.parse(brut); } catch (e) { return null; }
+  if (o && o.chiffre) {
+    if (!CLE) throw new Error('verrouille');
+    return JSON.parse(await dechiffrer(CLE, o));
+  }
+  return o;
+}
+let _file = Promise.resolve();
+function donneesEcrire(obj) {
+  const instantane = JSON.stringify(obj);
+  _file = _file.then(async () => {
+    if (SEC.mode === 'code' && CLE) localStorage.setItem(K_DATA, JSON.stringify(await chiffrer(CLE, instantane)));
+    else localStorage.setItem(K_DATA, instantane);
+    localStorage.setItem(K_SYNC, JSON.stringify(Object.assign(etatSync(), { modif: Date.now() })));
+  }).catch(e => { console.warn('Écriture impossible', e); try { toast('Sauvegarde impossible'); } catch (x) {} });
+  return _file;
+}
+function etatSync() {
+  try { return Object.assign({ pousse: 0, modif: 0, horloge: 0 }, JSON.parse(localStorage.getItem(K_SYNC) || '{}')); }
+  catch (e) { return { pousse: 0, modif: 0, horloge: 0 }; }
+}
+function majEtatSync(o) { localStorage.setItem(K_SYNC, JSON.stringify(Object.assign(etatSync(), o))); }
+
+/* ═════════════════════════ ÉCRAN DE VERROUILLAGE ═════════════════════════ */
+function ecranVerrou(html) {
+  const v = document.getElementById('verrou');
+  v.innerHTML = `<div class="vbox">
+    <div class="vlogo"><svg viewBox="0 0 188 188"><rect width="188" height="188" rx="44" fill="#3E4CB8"/>
+      <g transform="translate(50,34) scale(1.06)"><path d="M8 4 L8 92 L30 70 L46 108 L64 100 L48 63 L76 60 Z" fill="#fff" stroke="#fff" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/></g></svg>
+      <div><b>D<i>&amp;</i>B</b><span>INFORMATIQUE</span></div></div>
+    ${html}</div>`;
+  v.classList.add('on');
+  document.body.classList.add('bloque');
+}
+function fermerVerrou() {
+  const v = document.getElementById('verrou');
+  v.classList.remove('on'); v.innerHTML = '';
+  document.body.classList.remove('bloque');
+  DEVERROUILLE = true;
+}
+
+function vueDeverrouiller(msg) {
+  const bloque = SEC.bloqueJusqu > Date.now();
+  const reste = Math.ceil((SEC.bloqueJusqu - Date.now()) / 1000);
+  ecranVerrou(`
+    <h2>Application verrouillée</h2>
+    <p class="vp">Saisissez votre code d'accès pour ouvrir vos données.</p>
+    <input id="vcode" type="password" inputmode="numeric" autocomplete="current-password"
+           placeholder="Code d'accès" ${bloque ? 'disabled' : ''} onkeydown="if(event.key==='Enter')tenterDeverrouillage()">
+    ${msg ? `<div class="verr">${esc(msg)}</div>` : ''}
+    ${bloque ? `<div class="verr">Trop de tentatives. Réessayez dans <b id="vcompte">${reste}</b> secondes.</div>` : ''}
+    <button class="btn" id="vbtn" ${bloque ? 'disabled' : ''} onclick="tenterDeverrouillage()">Ouvrir</button>
+    <div class="vaide">Code oublié&nbsp;? Vos données sont chiffrées avec ce code : elles ne peuvent pas être
+      récupérées sans lui. Vous pouvez repartir d'une sauvegarde exportée.
+      <a href="#" onclick="repartirDeZero();return false">Réinitialiser l'application</a></div>`);
+  setTimeout(() => { const c = document.getElementById('vcode'); if (c && !bloque) c.focus(); }, 60);
+  if (bloque) {
+    const t = setInterval(() => {
+      const r = Math.ceil((SEC.bloqueJusqu - Date.now()) / 1000);
+      const el = document.getElementById('vcompte');
+      if (r <= 0) { clearInterval(t); vueDeverrouiller(); return; }
+      if (el) el.textContent = r; else clearInterval(t);
+    }, 500);
+  }
+}
+
+async function tenterDeverrouillage() {
+  const code = (document.getElementById('vcode') || {}).value || '';
+  if (!code) return;
+  const btn = document.getElementById('vbtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Vérification…'; }
+  try {
+    const cle = await deriverCle(code, SEC.sel, SEC.iter);
+    const brut = JSON.parse(localStorage.getItem(K_DATA) || 'null');
+    if (brut && brut.chiffre) await dechiffrer(cle, brut);     // lève une exception si le code est faux
+    CLE = cle;
+    SEC.essais = 0; SEC.bloqueJusqu = 0; secEcrire();
+    await ouvrirApplication();
+  } catch (e) {
+    SEC.essais = (SEC.essais || 0) + 1;
+    let m = 'Code incorrect.';
+    if (SEC.essais >= 5) {
+      const delai = Math.min(300, 30 * Math.pow(2, SEC.essais - 5)) * 1000;
+      SEC.bloqueJusqu = Date.now() + delai;
+      m = 'Code incorrect. Saisies bloquées temporairement.';
+    }
+    secEcrire();
+    vueDeverrouiller(m);
+  }
+}
+
+function repartirDeZero() {
+  if (!confirm('Réinitialiser complètement l\'application ? Toutes les données de cet appareil seront effacées. '
+    + 'Cette action est irréversible.')) return;
+  if (!confirm('Confirmation : effacer définitivement les données de cet appareil ?')) return;
+  localStorage.removeItem(K_DATA); localStorage.removeItem(K_SEC);
+  localStorage.removeItem(K_SYNC);
+  location.reload();
+}
+
+/* ═════════════════════════ DÉMARRAGE ═════════════════════════ */
+async function demarrer() {
+  if (SEC.mode === 'code' && estChiffre()) { vueDeverrouiller(); return; }
+  await ouvrirApplication();
+}
+
+async function ouvrirApplication() {
+  let d = null;
+  try { d = await donneesLire(); } catch (e) { vueDeverrouiller('Impossible de lire les données.'); return; }
+  if (d) D = Object.assign({}, DEFAUT, d, { entreprise: Object.assign({}, DEFAUT.entreprise, d.entreprise || {}) });
+  fermerVerrou();
+  router();
+  demarrerAutoLock();
+  if (SEC.cloud && fbConfig()) nuageDemarrer().catch(e => console.warn('Nuage', e));
+  accueilPremiereFois();
+}
+
+function accueilPremiereFois() {
+  if (D.clients.length || D.factures.length) return;
+  setTimeout(() => {
+    modal('Bienvenue',
+      `<p style="font-size:15px;line-height:1.65;margin-bottom:14px">Cette application gère vos clients, vos devis,
+        vos factures, vos relances, vos contrats récurrents et votre prospection. Elle fonctionne
+        <b>hors ligne</b> et peut, si vous le souhaitez, se synchroniser entre votre ordinateur et vos téléphones.</p>
+      <div class="alert warn"><b>Trois choses à faire tout de suite.</b><br>
+        1. Renseigner votre RCCM et votre NIU dans les Paramètres : sans eux, vos factures ne sont pas exploitables par vos clients.<br>
+        2. Activer le code d'accès, dans Paramètres → Sécurité. Vos données seront chiffrées sur cet appareil.<br>
+        3. Prendre l'habitude d'exporter une sauvegarde chaque vendredi.</div>
+      <p style="font-size:14px;color:var(--gris)">Vous pouvez charger un jeu de démonstration pour explorer l'application,
+        puis tout effacer avant de commencer pour de vrai.</p>`,
+      `<button class="btn sec" onclick="demo();fermer()">Charger la démonstration</button>
+       <button class="btn" onclick="fermer();location.hash='#parametres'">Configurer mon entreprise</button>`);
+  }, 350);
+}
+
+/* ───────────────────── verrouillage automatique ───────────────────── */
+let _tAuto = null;
+function demarrerAutoLock() {
+  ['click', 'keydown', 'touchstart', 'scroll'].forEach(ev =>
+    document.addEventListener(ev, () => { derniereActivite = Date.now(); }, { passive: true }));
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) verifierAutoLock(); });
+  clearInterval(_tAuto);
+  _tAuto = setInterval(verifierAutoLock, 20000);
+}
+function verifierAutoLock() {
+  if (!DEVERROUILLE || SEC.mode !== 'code' || !SEC.autoLock) return;
+  if (Date.now() - derniereActivite > SEC.autoLock * 60000) verrouillerMaintenant();
+}
+function verrouillerMaintenant() {
+  if (SEC.mode !== 'code') { toast('Activez d\'abord un code d\'accès dans les Paramètres'); return; }
+  CLE = null; DEVERROUILLE = false;
+  D = JSON.parse(JSON.stringify(DEFAUT));
+  try { fermer(); } catch (e) {}
+  vueDeverrouiller();
+}
+
+/* ═════════════════════════ ACTIVATION DU CODE ═════════════════════════ */
+function activerCode() {
+  if (!cryptoDispo()) {
+    modal('Chiffrement indisponible',
+      `<div class="alert danger">Ce navigateur ne donne pas accès aux fonctions de chiffrement. Cela arrive
+       lorsque la page est ouverte directement depuis un fichier sur certains navigateurs.<br><br>
+       Ouvrez l'application depuis son adresse en <b>https</b> (voir le guide d'hébergement) et réessayez.</div>`,
+      `<button class="btn" onclick="fermer()">J'ai compris</button>`);
+    return;
+  }
+  modal('Activer le code d\'accès',
+    `<div class="alert warn"><b>À lire avant de continuer.</b> Vos données seront chiffrées sur cet appareil avec
+      ce code. <b>Si vous l'oubliez, personne — pas même nous — ne peut les récupérer.</b> Exportez une sauvegarde
+      avant de continuer, et notez le code dans un endroit sûr.</div>
+    <div class="champ"><label>Code d'accès — 6 caractères minimum</label>
+      <input id="c1" type="password" autocomplete="new-password" placeholder="Votre code"></div>
+    <div class="champ"><label>Confirmation</label>
+      <input id="c2" type="password" autocomplete="new-password" placeholder="Le même code"></div>
+    <div class="champ"><label>Verrouillage automatique après</label>
+      <select id="c3">
+        <option value="5">5 minutes d'inactivité</option>
+        <option value="15" selected>15 minutes d'inactivité</option>
+        <option value="60">1 heure d'inactivité</option>
+        <option value="0">jamais</option>
+      </select></div>
+    <label style="display:flex;gap:9px;align-items:flex-start;font-size:13.5px;margin-top:6px">
+      <input type="checkbox" id="c4" style="width:auto;margin-top:3px">
+      <span>J'ai exporté une sauvegarde et j'ai noté ce code dans un endroit sûr.</span></label>`,
+    `<button class="btn sec" onclick="exporter()">Exporter d'abord</button>
+     <button class="btn" onclick="confirmerCode()">Activer</button>`);
+}
+async function confirmerCode() {
+  const a = val('c1'), b = val('c2');
+  if (a.length < 6) { toast('Le code doit faire au moins 6 caractères'); return; }
+  if (a !== b) { toast('Les deux codes ne correspondent pas'); return; }
+  if (!document.getElementById('c4').checked) { toast('Cochez la case de confirmation'); return; }
+  SEC.mode = 'code';
+  SEC.sel = b64(crypto.getRandomValues(new Uint8Array(16)));
+  SEC.autoLock = Number(val('c3'));
+  SEC.essais = 0; SEC.bloqueJusqu = 0;
+  CLE = await deriverCle(a, SEC.sel, SEC.iter);
+  secEcrire();
+  await donneesEcrire(D);
+  fermer(); router();
+  toast('Code activé — vos données sont désormais chiffrées sur cet appareil');
+}
+function desactiverCode() {
+  if (!confirm('Désactiver le code d\'accès ? Vos données ne seront plus chiffrées sur cet appareil.')) return;
+  SEC.mode = 'aucun'; CLE = null; secEcrire();
+  localStorage.setItem(K_DATA, JSON.stringify(D));
+  router(); toast('Code désactivé');
+}
+function changerCode() { activerCode(); }
+
+/* ═════════════════════════ SYNCHRONISATION FIREBASE ═════════════════════════ */
+const FB_SDK = 'https://www.gstatic.com/firebasejs/10.12.5';
+let FB = null;
+let SYNC_ETAT = 'hors';   // hors | connexion | ok | erreur
+
+function fbConfig() { try { return JSON.parse(localStorage.getItem(K_FB) || 'null'); } catch (e) { return null; } }
+function fbConfigEcrire(o) { localStorage.setItem(K_FB, JSON.stringify(o)); }
+
+async function fbCharger() {
+  if (FB) return FB;
+  const cfg = fbConfig();
+  if (!cfg || !cfg.projectId) throw new Error('Configuration Firebase absente');
+  const [app, auth, fs] = await Promise.all([
+    import(`${FB_SDK}/firebase-app.js`),
+    import(`${FB_SDK}/firebase-auth.js`),
+    import(`${FB_SDK}/firebase-firestore.js`)
+  ]);
+  const a = app.initializeApp(cfg);
+  let authentif;
+  try { authentif = auth.initializeAuth(a, { persistence: auth.browserLocalPersistence }); }   // e-mail + mot de passe uniquement : pas de gapi ni d'iframe
+  catch (e) { authentif = auth.getAuth(a); }
+  try { await auth.setPersistence(authentif, auth.browserLocalPersistence); } catch (e) {}
+  let db;
+  try {
+    db = fs.initializeFirestore(a, { localCache: fs.persistentLocalCache({ tabManager: fs.persistentMultipleTabManager() }) });
+  } catch (e) { db = fs.getFirestore(a); }
+  FB = { app: a, auth, fs, authentif, db, user: null, off: null };
+  return FB;
+}
+
+function badgeSync(etat, texte) {
+  SYNC_ETAT = etat;
+  const el = document.getElementById('badgeSync');
+  if (!el) return;
+  const c = { hors: 'gris', connexion: 'blue', ok: 'ok', erreur: 'red' }[etat] || 'gris';
+  el.className = 'puce ' + c;
+  el.textContent = texte || { hors: 'Local', connexion: 'Connexion…', ok: 'Synchronisé', erreur: 'Erreur' }[etat];
+}
+
+async function nuageDemarrer() {
+  badgeSync('connexion');
+  const f = await fbCharger();
+  return new Promise(resolve => {
+    f.auth.onAuthStateChanged(f.authentif, async u => {
+      f.user = u;
+      if (!u) { badgeSync('hors', 'Non connecté'); resolve(false); return; }
+      try { await nuageEcouter(); await nuagePousserMaintenant(); badgeSync('ok'); }
+      catch (e) { console.warn(e); badgeSync('erreur'); }
+      router(); resolve(true);
+    });
+  });
+}
+
+async function nuageConnexion(email, mdp) {
+  const f = await fbCharger();
+  await f.auth.signInWithEmailAndPassword(f.authentif, email, mdp);
+  SEC.cloud = true; secEcrire();
+  await nuageDemarrer();
+}
+async function nuageDeconnexion() {
+  if (!FB) return;
+  if (FB.off) { FB.off(); FB.off = null; }
+  await FB.auth.signOut(FB.authentif);
+  FB.user = null; SEC.cloud = false; secEcrire();
+  badgeSync('hors'); router(); toast('Déconnecté de la synchronisation');
+}
+
+function docRef() { return FB.fs.doc(FB.db, 'entreprises', FB.user.uid); }
+
+async function nuagePousserMaintenant() {
+  if (!FB || !FB.user) return;
+  const charge = JSON.stringify(D);
+  if (charge.length > 900000) {
+    toast('Données trop volumineuses pour la synchronisation — archivez les anciens exercices');
+    badgeSync('erreur', 'Trop volumineux'); return;
+  }
+  const h = Date.now();
+  await FB.fs.setDoc(docRef(), {
+    donnees: charge, horloge: h, appareil: idAppareil(),
+    nomAppareil: nomAppareil(), maj: FB.fs.serverTimestamp()
+  });
+  majEtatSync({ pousse: h, horloge: h });
+  badgeSync('ok');
+}
+
+let _tPousse = null;
+function nuagePousser() {
+  if (!FB || !FB.user) return;
+  clearTimeout(_tPousse);
+  _tPousse = setTimeout(() => nuagePousserMaintenant().catch(e => { console.warn(e); badgeSync('erreur'); }), 1500);
+}
+
+async function nuageEcouter() {
+  if (FB.off) FB.off();
+  const premier = await FB.fs.getDoc(docRef());
+  if (premier.exists()) appliquerDistant(premier.data(), true);
+  FB.off = FB.fs.onSnapshot(docRef(), s => { if (s.exists()) appliquerDistant(s.data(), false); },
+    e => { console.warn('Écoute', e); badgeSync('erreur'); });
+}
+
+function appliquerDistant(d, initial) {
+  if (!d || !d.donnees) return;
+  if (d.appareil === idAppareil()) return;
+  const et = etatSync();
+  if (d.horloge <= et.horloge) return;
+  const conflit = et.modif > et.pousse;         // des modifications locales n'ont pas été poussées
+  const adopter = () => {
+    try {
+      const dist = JSON.parse(d.donnees);
+      D = Object.assign({}, DEFAUT, dist, { entreprise: Object.assign({}, DEFAUT.entreprise, dist.entreprise || {}) });
+      donneesEcrire(D);
+      majEtatSync({ horloge: d.horloge, pousse: d.horloge, modif: d.horloge });
+      router(); badgeSync('ok');
+      toast('Données mises à jour depuis ' + (d.nomAppareil || 'un autre appareil'));
+    } catch (e) { console.warn(e); badgeSync('erreur'); }
+  };
+  if (!conflit) { adopter(); return; }
+  telecharger('DB_Gestion_conflit_local_' + auj() + '.json', JSON.stringify(D, null, 2), 'application/json');
+  modal('Deux appareils ont été modifiés',
+    `<div class="alert warn">Des modifications faites sur <b>cet appareil</b> n'avaient pas encore été synchronisées,
+      et <b>${esc(d.nomAppareil || 'un autre appareil')}</b> a envoyé une version plus récente.</div>
+     <p style="font-size:14px;line-height:1.7">Une sauvegarde de la version de cet appareil vient d'être téléchargée
+       automatiquement : quel que soit votre choix, rien n'est perdu.</p>`,
+    `<button class="btn sec" onclick="fermer();nuagePousserMaintenant()">Garder cet appareil</button>
+     <button class="btn" onclick="fermer();__adopter()">Prendre la version distante</button>`);
+  window.__adopter = adopter;
+}
+
+async function nuageSynchroniser() {
+  if (!FB || !FB.user) { toast('Connectez-vous à la synchronisation'); return; }
+  badgeSync('connexion');
+  try { await nuageEcouter(); await nuagePousserMaintenant(); toast('Synchronisation effectuée'); }
+  catch (e) { console.warn(e); badgeSync('erreur'); toast('Synchronisation impossible'); }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   D&B INFORMATIQUE — Application de gestion
+   Données stockées localement. Aucun serveur, aucun compte.
+   ══════════════════════════════════════════════════════════════ */
+'use strict';
+
+const KEY = 'dbi_gestion_v1';
+
+const DEFAUT = {
+  version: 1,
+  entreprise: {
+    nom: 'D&B INFORMATIQUE',
+    forme: 'SARL au capital de 1 000 000 FCFA',
+    proprio: 'DILANGUE MBOME Claude Donald, gérant',
+    rccm: '', niu: '',
+    adresse: 'Yaoundé, Cameroun',
+    tel: '+237 674 496 342',
+    email: 'contact@dbinformatique.cm',
+    banque: '', rib: '', momo: '',
+    regime: 'Réel',
+    tauxTva: 19.25,
+    mentionTva: 'TVA 19,25 %',
+    penalite: '1,5 % du montant dû par mois de retard entamé',
+    validiteDevis: 15, delaiPaiement: 30,
+    seuilMensuel: 410000, tauxAcompteIs: 2.2
+  },
+  clients: [], devis: [], factures: [], contrats: [], interventions: [], prospects: []
+};
+
+/* Régime du réel — taux à revérifier chaque année avec le comptable.
+   TVA : 19,25 % (17,5 % + 10 % de centimes additionnels communaux).
+   Acompte mensuel d'impôt sur les sociétés : 2,2 % du chiffre d'affaires, CAC compris,
+   à verser au plus tard le 15 du mois suivant, régularisé sur la DSF. */
+
+const ETAPES = ['Identifié', 'Contacté', 'RDV tenu', 'Proposition remise', 'Négociation', 'Gagné', 'Perdu'];
+const ORIGINES = ['Recommandation', 'WhatsApp', 'LinkedIn', 'Facebook', 'Google', 'Session de sensibilisation',
+                  'Prescripteur', 'Site web', 'Réseau personnel', 'Courriel', 'Appel téléphonique', 'Prospection terrain', 'Autre'];
+const FORMULES = [
+  { nom: 'Sérénité Essentiel — maintenance au forfait', prix: 110000 },
+  { nom: 'Sérénité Business — maintenance au forfait', prix: 240000 },
+  { nom: 'Sérénité Corporate — maintenance au forfait', prix: 420000 },
+  { nom: 'DSI à temps partagé — Essentiel', prix: 220000 },
+  { nom: 'DSI à temps partagé — Business', prix: 400000 },
+  { nom: 'DSI à temps partagé — Premium', prix: 780000 },
+  { nom: 'ERP — abonnement Exploitation', prix: 650000 },
+  { nom: 'Socle Souverain 10 — exploitation', prix: 145000 },
+  { nom: 'Socle Souverain 25 — exploitation', prix: 290000 },
+  { nom: 'Socle Souverain 50 — exploitation', prix: 520000 },
+  { nom: 'ParcInfo hébergé — Découverte', prix: 35000 },
+  { nom: 'ParcInfo hébergé — Essentiel', prix: 75000 },
+  { nom: 'ParcInfo hébergé — Métier', prix: 150000 },
+  { nom: 'ParcInfo hébergé — Étendu', prix: 280000 },
+  { nom: 'Exploitation réseau interconnecté — 2 sites', prix: 180000 },
+  { nom: 'Exploitation réseau interconnecté — 4 sites', prix: 280000 },
+  { nom: 'Exploitation réseau interconnecté — 8 sites', prix: 520000 },
+  { nom: 'Visuels — Présence (4 / mois)', prix: 45000 }, { nom: 'Visuels — Régulier (8 / mois)', prix: 75000 },
+  { nom: 'Visuels — Intensif (16 / mois)', prix: 140000 }
+];
+
+/* Catalogue de prestations proposé dans l'éditeur de lignes — modifiable librement. */
+const CATALOGUE = [
+  ['Conseil & gouvernance', [
+    ['Audit SI 360°', 600000], ['Audit de cybersécurité et test d’intrusion', 900000],
+    ['Schéma directeur informatique', 750000], ['Plan de continuité et de reprise (PCA/PRA)', 700000],
+    ['Journée d’expertise à la carte', 150000]]],
+  ['Infrastructure & sûreté', [
+    ['Câblage et Wi-Fi professionnel — par point', 35000], ['Pare-feu : fourniture et configuration', 850000],
+    ['Serveur et virtualisation', 1200000], ['Sauvegarde 3-2-1', 850000],
+    ['Vidéosurveillance — kit 4 caméras posé', 330000], ['Contrôle d’accès — 1 porte', 450000]]],
+  ['Interconnexion multi-sites — VPN Hub & Spoke', [
+    ['Étude d’interconnexion multi-sites', 450000],
+    ['Hub — site central, pare-feu et politique', 1400000],
+    ['Spoke — par site distant raccordé', 650000],
+    ['Lien de secours sur le hub', 350000],
+    ['Lien de secours sur un spoke', 250000],
+    ['Accès nomade — par tranche de 10 utilisateurs', 250000],
+    ['Segmentation par service', 400000],
+    ['Pack interconnexion 2 sites', 2400000],
+    ['Pack interconnexion 4 sites', 4200000],
+    ['Pack interconnexion 8 sites', 7200000],
+    ['Supervision du réseau — par site et par mois', 65000],
+    ['Exploitation réseau 2 sites — mensuel', 180000],
+    ['Exploitation réseau 4 sites — mensuel', 280000],
+    ['Exploitation réseau 8 sites — mensuel', 520000]]],
+  ['Services managés', [
+    ['Sérénité Essentiel — mensuel', 110000], ['Sérénité Business — mensuel', 240000],
+    ['Sérénité Corporate — mensuel', 420000], ['Intervention hors contrat — heure', 25000]]],
+  ['Solutions digitales', [
+    ['Site vitrine', 380000], ['Boutique en ligne avec Mobile Money', 950000],
+    ['Application métier', 1800000], ['Tableau de bord décisionnel', 900000],
+    ['Audit d’opportunité IA', 500000]]],
+  ['Socle Souverain — offre signature', [
+    ['Diagnostic de souveraineté', 0],
+    ['Socle Souverain 10 — mise en place', 2400000],
+    ['Socle Souverain 25 — mise en place', 5400000],
+    ['Socle Souverain 50 — mise en place', 8900000],
+    ['Exploitation Souveraine 10 — mensuel', 145000],
+    ['Exploitation Souveraine 25 — mensuel', 290000],
+    ['Exploitation Souveraine 50 — mensuel', 520000],
+    ['Étude de souveraineté et cadrage', 500000],
+    ['Migration des données et des boîtes', 300000],
+    ['Journée de formation utilisateurs', 300000],
+    ['Sauvegarde hors site chiffrée — mensuel', 90000],
+    ['Déploiement ParcInfo (ITSM)', 0]]],
+  ['ParcInfo — logiciel édité par D&B', [
+    ['ParcInfo hébergé — Découverte, 50 actifs, mensuel', 35000],
+    ['ParcInfo hébergé — Essentiel, 150 actifs, mensuel', 75000],
+    ['ParcInfo hébergé — Métier, 400 actifs, mensuel', 150000],
+    ['ParcInfo hébergé — Étendu, 1 000 actifs, mensuel', 280000],
+    ['Mise en service ParcInfo hébergé', 450000],
+    ['Licence perpétuelle ParcInfo — 150 actifs', 2400000],
+    ['Licence perpétuelle ParcInfo — 400 actifs', 4500000],
+    ['Licence perpétuelle ParcInfo — 1 000 actifs', 7500000],
+    ['Licence perpétuelle ParcInfo — illimité mono-site', 12000000],
+    ['Mise en service ParcInfo sur site', 900000],
+    ['Maintenance annuelle ParcInfo — 150 actifs', 430000],
+    ['Maintenance annuelle ParcInfo — 400 actifs', 810000],
+    ['Reprise de l’inventaire existant', 350000],
+    ['Journée de formation ParcInfo', 300000]]],
+  ['ERP — progiciel de gestion', [
+    ['Étude d’opportunité et choix de la solution ERP', 1400000],
+    ['Déploiement ERP — socle 3 modules', 6000000],
+    ['Module ERP supplémentaire', 1400000],
+    ['Reprise et migration des données', 1600000],
+    ['Développement spécifique ERP — par jour', 250000],
+    ['Formation utilisateurs ERP — par journée', 300000],
+    ['Accompagnement au démarrage — 1 mois', 1800000],
+    ['Pack ERP PME — Démarrage', 11500000],
+    ['Pack ERP PME — Complet', 19500000],
+    ['Tierce maintenance applicative — mensuel', 300000],
+    ['Hébergement et sauvegarde ERP — mensuel', 150000],
+    ['Abonnement Exploitation ERP — mensuel', 650000]]],
+  ['ERP sur mesure', [
+    ['Cadrage fonctionnel détaillé', 900000],
+    ['ERP sur mesure — socle 3 domaines', 9000000],
+    ['Domaine fonctionnel supplémentaire', 2200000],
+    ['Application mobile terrain', 3000000],
+    ['Interface avec un système existant', 800000],
+    ['Reprise et migration des données', 1600000],
+    ['Journée de formation utilisateurs', 300000],
+    ['Hébergement et exploitation — mensuel', 150000]]],
+  ['Infographie & communication visuelle', [
+    ['Création de logo', 150000], ['Charte graphique simplifiée', 120000],
+    ['Pack identité complet', 250000], ['Carte de visite', 25000], ['Flyer A5 recto-verso', 35000],
+    ['Affiche A3 / A2', 40000], ['Plaquette commerciale 4 pages', 90000], ['Roll-up 85 × 200 cm', 45000],
+    ['Habillage de véhicule', 80000], ['Bannière de réseau social', 20000],
+    ['Visuel de publication — à l’unité', 8000], ['Carrousel LinkedIn', 45000],
+    ['Infographie de données', 50000], ['Retouche et détourage — par photo', 3000],
+    ['Abonnement visuels — Régulier, 8 / mois', 75000]]],
+  ['Formation', [
+    ['Sensibilisation à la cybersécurité — demi-journée', 200000],
+    ['Bureautique et Excel avancé — 3 jours', 380000], ['Administration réseau — 5 jours', 700000]]]
+];
+const RELANCES = [
+  [90, 'CONTENTIEUX', 'red', 'Saisir le conseil. Au-delà de 90 jours la créance devient très difficile à recouvrer.'],
+  [60, 'MISE EN DEMEURE', 'red', 'Mise en demeure écrite remise contre décharge. Appliquer les pénalités et suspendre les prestations.'],
+  [45, 'APPEL DÉCIDEUR', 'warn', 'Appeler le décideur, pas le comptable. Proposer un échéancier plutôt que d’attendre.'],
+  [30, 'RELANCE ÉCRITE', 'warn', 'Relance écrite formelle avec accusé de réception. Rappeler l’échéance et le montant.'],
+  [15, 'COURTOISIE', 'blue', 'Message de courtoisie : s’assurer que la facture est bien parvenue et ne pose pas de difficulté.'],
+  [0, 'SUIVI', 'gris', 'Rien à faire. Vérifier simplement la bonne réception.']
+];
+
+/* ─────────────────────────── état ─────────────────────────── */
+/* Les données sont chargées par ouvrirApplication() une fois l'application déverrouillée
+   (voir le module Sécurité). Elles partent donc d'un état vide. */
+let D = JSON.parse(JSON.stringify(DEFAUT));
+
+function sauver() {
+  try { donneesEcrire(D); nuagePousser(); }
+  catch (e) { toast('Sauvegarde impossible : espace saturé'); }
+}
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+/* ─────────────────────────── utilitaires ─────────────────────────── */
+const N = v => Number(v) || 0;
+const fm = v => N(v).toLocaleString('fr-FR', { maximumFractionDigits: 0 });
+const fmc = v => fm(v) + ' F';
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const auj = () => new Date().toISOString().slice(0, 10);
+function fdate(s) { if (!s) return '—'; const [y, m, d] = s.split('-'); return d + '/' + m + '/' + y; }
+function jours(a, b) { if (!a) return 0; return Math.floor((new Date(b || auj()) - new Date(a)) / 86400000); }
+function plusJours(s, n) { const d = new Date(s || auj()); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); }
+function toast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2600); }
+const client = id => D.clients.find(c => c.id === id);
+const nomClient = id => { const c = client(id); return c ? c.nom : '—'; };
+
+function enLettres(n) {
+  n = Math.round(N(n));
+  if (n === 0) return 'zéro';
+  const u = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf', 'dix', 'onze', 'douze',
+    'treize', 'quatorze', 'quinze', 'seize', 'dix-sept', 'dix-huit', 'dix-neuf'];
+  const d = ['', '', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante', 'quatre-vingt', 'quatre-vingt'];
+  function moins100(x) {
+    if (x < 20) return u[x];
+    const di = Math.floor(x / 10), un = x % 10;
+    if (di === 7 || di === 9) return d[di] + '-' + u[10 + un];
+    return d[di] + (un === 1 && di !== 8 ? '-et-un' : un ? '-' + u[un] : (di === 8 ? 's' : ''));
+  }
+  function moins1000(x) {
+    if (x < 100) return moins100(x);
+    const c = Math.floor(x / 100), r = x % 100;
+    return (c > 1 ? u[c] + ' ' : '') + 'cent' + (c > 1 && !r ? 's' : '') + (r ? ' ' + moins100(r) : '');
+  }
+  let out = '', reste = n;
+  const mil = Math.floor(reste / 1000000); reste %= 1000000;
+  const mille = Math.floor(reste / 1000); reste %= 1000;
+  if (mil) out += (mil > 1 ? moins1000(mil) + ' millions ' : 'un million ');
+  if (mille) out += (mille > 1 ? moins1000(mille) + ' mille ' : 'mille ');
+  if (reste) out += moins1000(reste);
+  return out.trim();
+}
+
+/* ─────────────────────────── calculs ─────────────────────────── */
+function tauxTva() { const t = N(D.entreprise.tauxTva); return isFinite(t) ? t / 100 : 0.1925; }
+function totaux(doc) {
+  const ht = (doc.lignes || []).reduce((s, l) => s + N(l.qte) * N(l.pu), 0);
+  const rem = ht * (N(doc.remise) / 100);
+  const net = ht - rem;
+  const tva = Math.round(net * tauxTva());
+  return { ht, rem, net, tva, ttc: net + tva };
+}
+function nextNum(prefixe, liste) {
+  const an = new Date().getFullYear();
+  const rangs = liste.filter(x => (x.num || '').includes('-' + an + '-'))
+    .map(x => parseInt((x.num || '').split('-')[2], 10) || 0);
+  const r = (rangs.length ? Math.max.apply(null, rangs) : 0) + 1;
+  return prefixe + '-' + an + '-' + String(r).padStart(3, '0');
+}
+function paye(f) { return (f.paiements || []).reduce((s, p) => s + N(p.montant), 0); }
+function reste(f) { return Math.max(0, totaux(f).ttc - N(f.acompte) - paye(f)); }
+function statutFacture(f) {
+  const r = reste(f);
+  if (r <= 0) return { t: 'Soldée', c: 'ok', j: 0 };
+  const j = jours(f.date);
+  const n = RELANCES.find(x => j > x[0]) || RELANCES[RELANCES.length - 1];
+  return { t: n[1], c: n[2], j, action: n[3] };
+}
+function fiscalDe(caHT) {
+  const tva = Math.round(caHT * tauxTva());
+  const tauxAc = N(D.entreprise.tauxAcompteIs) || 2.2;
+  const acompte = Math.round(caHT * tauxAc / 100);
+  return { tva, acompte, total: tva + acompte, tauxAc };
+}
+function anneeEnCours() { return String(new Date().getFullYear()); }
+function facturesAn() { return D.factures.filter(f => (f.date || '').startsWith(anneeEnCours())); }
+function caFacture() { return facturesAn().reduce((s, f) => s + totaux(f).net, 0); }
+function caEncaisse() { return facturesAn().reduce((s, f) => s + N(f.acompte) + paye(f), 0); }
+function encours() { return D.factures.reduce((s, f) => s + reste(f), 0); }
+function recurrentMensuel() {
+  return D.contrats.filter(c => c.statut === 'Actif')
+    .reduce((s, c) => s + N(c.montantMensuel) + (c.options || []).reduce((t, o) => t + N(o.prix), 0), 0);
+}
+function relancesDues() {
+  return D.factures.filter(f => reste(f) > 0).map(f => ({ f, s: statutFacture(f) }))
+    .filter(x => x.s.j > 15).sort((a, b) => b.s.j - a.s.j);
+}
+function pipelinePondere() {
+  return D.prospects.filter(p => !['Gagné', 'Perdu'].includes(p.etape))
+    .reduce((s, p) => s + N(p.montant) * (N(p.proba) / 100), 0);
+}
+
+/* ─────────────────────────── navigation ─────────────────────────── */
+const PAGES = [
+  { id: 'bord', ic: '◎', nom: 'Tableau de bord' },
+  { id: 'relances', ic: '!', nom: 'Relances' },
+  { id: 'clients', ic: '☺', nom: 'Clients' },
+  { id: 'devis', ic: '✎', nom: 'Devis' },
+  { id: 'factures', ic: '₣', nom: 'Factures' },
+  { id: 'contrats', ic: '⟳', nom: 'Contrats' },
+  { id: 'interventions', ic: '⚑', nom: 'Interventions' },
+  { id: 'pipeline', ic: '↗', nom: 'Prospection' },
+  { id: 'visites', ic: '⌂', nom: 'Visites terrain' },
+  { id: 'memo', ic: '✦', nom: 'Aide-mémoire' },
+  { id: 'parametres', ic: '⚙', nom: 'Paramètres' }
+];
+
+function menu() {
+  const cur = (location.hash || '#bord').slice(1).split('/')[0];
+  const nb = relancesDues().length;
+  document.getElementById('nav').innerHTML = PAGES.map(p =>
+    `<a href="#${p.id}" class="${p.id === cur ? 'on' : ''}"><span class="ic">${p.ic}</span>${esc(p.nom)}` +
+    (p.id === 'relances' && nb ? `<span class="badge">${nb}</span>` : '') + `</a>`).join('');
+}
+
+function router() {
+  const cur = (location.hash || '#bord').slice(1).split('/')[0];
+  const page = PAGES.find(p => p.id === cur) || PAGES[0];
+  document.getElementById('titre').textContent = page.nom;
+  document.body.classList.remove('menu');
+  menu();
+  const v = document.getElementById('vue'), a = document.getElementById('actions');
+  a.innerHTML = '';
+  ({ bord: vBord, relances: vRelances, clients: vClients, devis: vDevis, factures: vFactures,
+     contrats: vContrats, interventions: vInterventions, pipeline: vPipeline, visites: vVisites, memo: vMemo, parametres: vParametres
+   }[page.id] || vBord)(v, a);
+  window.scrollTo(0, 0);
+}
+
+/* ─────────────────────────── modale ─────────────────────────── */
+function modal(titre, corps, boutons, large) {
+  document.getElementById('mbox').className = 'box' + (large ? ' wide' : '');
+  document.getElementById('mbox').innerHTML =
+    `<div class="hd"><h2>${esc(titre)}</h2><button class="btn sec sm" onclick="fermer()">Fermer</button></div>
+     <div class="bd">${corps}</div>` + (boutons ? `<div class="ft">${boutons}</div>` : '');
+  document.getElementById('modal').classList.add('on');
+}
+function fermer() { document.getElementById('modal').classList.remove('on'); }
+document.getElementById('modal').addEventListener('click', e => { if (e.target.id === 'modal') fermer(); });
+
+function val(id) { const e = document.getElementById(id); return e ? e.value.trim() : ''; }
+function nval(id) { return N((document.getElementById(id) || {}).value); }
+
+function champ(id, lab, v, type, hint, opts) {
+  if (type === 'select') {
+    return `<div class="field"><label for="${id}">${esc(lab)}</label><select id="${id}">` +
+      opts.map(o => `<option ${o === v ? 'selected' : ''}>${esc(o)}</option>`).join('') + `</select>` +
+      (hint ? `<div class="hint">${esc(hint)}</div>` : '') + `</div>`;
+  }
+  if (type === 'textarea') {
+    return `<div class="field"><label for="${id}">${esc(lab)}</label><textarea id="${id}">${esc(v || '')}</textarea>` +
+      (hint ? `<div class="hint">${esc(hint)}</div>` : '') + `</div>`;
+  }
+  return `<div class="field"><label for="${id}">${esc(lab)}</label>` +
+    `<input id="${id}" type="${type || 'text'}" value="${esc(v == null ? '' : v)}">` +
+    (hint ? `<div class="hint">${esc(hint)}</div>` : '') + `</div>`;
+}
+function selClient(id, v) {
+  return `<div class="field"><label for="${id}">Client</label><select id="${id}">` +
+    `<option value="">— choisir —</option>` +
+    D.clients.map(c => `<option value="${c.id}" ${c.id === v ? 'selected' : ''}>${esc(c.nom)}</option>`).join('') +
+    `</select></div>`;
+}
+function vide(txt, bouton) {
+  return `<div class="empty"><div class="big">◌</div><p>${esc(txt)}</p>${bouton || ''}</div>`;
+}
+
+/* ═══════════════════ TABLEAU DE BORD ═══════════════════ */
+function vBord(v, a) {
+  const caf = caFacture(), cae = caEncaisse(), enc = encours(), rec = recurrentMensuel();
+  const fisc = fiscalDe(caf), rel = relancesDues(), pond = pipelinePondere();
+  const seuil = N(D.entreprise.seuilMensuel);
+  const mois = new Date().getMonth() + 1;
+  const objAn = seuil * 12 * 2.3;
+  const enRetard = D.factures.filter(f => reste(f) > 0 && statutFacture(f).j > 30).reduce((s, f) => s + reste(f), 0);
+  const jrsEnc = caf > 0 ? Math.round(enc / (caf / 365)) : 0;
+
+  a.innerHTML = `<button class="btn sm" onclick="fDevis()">+ Devis</button>`;
+
+  let h = '';
+  if (!D.entreprise.rccm || !D.entreprise.niu) {
+    h += `<div class="alert warn"><b>À compléter avant votre première facture.</b> Votre RCCM et votre NIU
+      ne sont pas renseignés. Sans eux, vos factures sont inexploitables par la comptabilité de vos clients.
+      <a href="#parametres">Les saisir maintenant →</a></div>`;
+  }
+  if (rel.length) {
+    h += `<div class="alert red"><b>${rel.length} facture${rel.length > 1 ? 's' : ''} à relancer</b> —
+      ${fmc(rel.reduce((s, x) => s + reste(x.f), 0))} en attente. <a href="#relances">Voir le détail →</a></div>`;
+  }
+
+  h += `<div class="kpis">
+    <div class="kpi"><div class="lab">CA facturé ${anneeEnCours()}</div><div class="val">${fm(caf)}</div>
+      <div class="sub">${fm(cae)} F encaissés</div></div>
+    <div class="kpi ${enc > caf * 0.2 ? 'red' : 'ok'}"><div class="lab">Encours client</div><div class="val">${fm(enc)}</div>
+      <div class="sub">${jrsEnc} jours de CA${enRetard ? ' · ' + fm(enRetard) + ' F en retard' : ''}</div></div>
+    <div class="kpi ok"><div class="lab">Récurrent mensuel</div><div class="val">${fm(rec)}</div>
+      <div class="sub">${D.contrats.filter(c => c.statut === 'Actif').length} contrat(s) actif(s) · ${fm(rec * 12)} F par an</div></div>
+    <div class="kpi warn"><div class="lab">Pipeline pondéré</div><div class="val">${fm(pond)}</div>
+      <div class="sub">${D.prospects.filter(p => !['Gagné', 'Perdu'].includes(p.etape)).length} affaire(s) en cours</div></div>
+  </div>`;
+
+  const pctSeuil = seuil > 0 ? Math.min(200, (rec / seuil) * 100) : 0;
+  h += `<div class="card"><h3>Le chiffre qui compte<span class="r">Couverture du seuil par le récurrent</span></h3>
+    <div class="body">
+      <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+        <div style="font-size:34px;font-weight:800;color:var(--encre);letter-spacing:-1px">${Math.round(pctSeuil)} %</div>
+        <div style="color:var(--gris);font-size:13.5px">de votre seuil de rentabilité mensuel (${fmc(seuil)})
+          est couvert par vos contrats récurrents.</div>
+      </div>
+      <div class="bar"><i class="${pctSeuil >= 100 ? 'ok' : pctSeuil >= 50 ? '' : 'warn'}" style="width:${Math.min(100, pctSeuil)}%"></i></div>
+      <p style="font-size:13px;color:var(--gris);margin-top:12px">
+        ${pctSeuil >= 100
+          ? 'Vos charges fixes sont couvertes par le récurrent. Chaque projet signé est désormais du bénéfice.'
+          : 'Il vous manque ' + fmc(Math.max(0, seuil - rec)) + ' de récurrent mensuel pour ne plus dépendre des projets. Soit environ ' +
+            Math.ceil(Math.max(0, seuil - rec) / 240000) + ' contrat(s) Sérénité Business.'}
+      </p>
+    </div></div>`;
+
+  h += `<div class="card"><h3>Fiscalité — régime du réel</h3><div class="body">
+    <div class="grid3">
+      <div><div class="lab" style="font-size:11.5px;font-weight:700;color:var(--gris);text-transform:uppercase">TVA collectée sur l’année</div>
+        <div style="font-size:22px;font-weight:800;color:var(--encre)">${fm(fisc.tva)} F</div></div>
+      <div><div class="lab" style="font-size:11.5px;font-weight:700;color:var(--gris);text-transform:uppercase">Acomptes d’impôt société</div>
+        <div style="font-size:22px;font-weight:800;color:var(--rouge)">${fm(fisc.acompte)} F</div></div>
+      <div><div class="lab" style="font-size:11.5px;font-weight:700;color:var(--gris);text-transform:uppercase">À ne jamais dépenser</div>
+        <div style="font-size:22px;font-weight:800;color:var(--rouge)">${fm(fisc.total)} F</div></div>
+    </div>
+    <p style="font-size:13px;color:var(--gris);margin-top:14px">
+      La TVA que vous encaissez ne vous appartient pas : vous la reversez chaque mois, diminuée de la TVA
+      payée sur vos achats. S’y ajoute un acompte d’impôt sur les sociétés de ${fisc.tauxAc} % du chiffre
+      d’affaires, dû le 15 du mois suivant et régularisé sur la déclaration annuelle.
+      Mettez de côté ${fmc(Math.round(fisc.total / 12))} par mois, sur un compte distinct.
+    </p></div></div>`;
+
+  const derniers = D.factures.slice().sort((x, y) => (y.date || '').localeCompare(x.date || '')).slice(0, 6);
+  h += `<div class="card"><h3>Dernières factures</h3><div class="body p0"><div class="tw">` +
+    (derniers.length ? `<table><thead><tr><th>N°</th><th>Client</th><th class="num">Montant</th>
+      <th class="num">Reste dû</th><th>État</th></tr></thead><tbody>` +
+      derniers.map(f => { const s = statutFacture(f); return `<tr class="clic" onclick="location.hash='#factures'">
+        <td><b>${esc(f.num)}</b><div class="mini">${fdate(f.date)}</div></td>
+        <td>${esc(nomClient(f.clientId))}</td>
+        <td class="num">${fmc(totaux(f).ttc)}</td>
+        <td class="num">${reste(f) > 0 ? fmc(reste(f)) : '—'}</td>
+        <td><span class="pill ${s.c}">${s.t}</span></td></tr>`; }).join('') + `</tbody></table>`
+      : vide('Aucune facture pour l’instant.')) + `</div></div></div>`;
+  v.innerHTML = h;
+}
+
+/* ═══════════════════ RELANCES ═══════════════════ */
+function vRelances(v, a) {
+  const rel = relancesDues();
+  const tout = D.factures.filter(f => reste(f) > 0).map(f => ({ f, s: statutFacture(f) })).sort((x, y) => y.s.j - x.s.j);
+  let h = '';
+  if (!tout.length) { v.innerHTML = `<div class="alert ok"><b>Rien à relancer.</b> Toutes vos factures sont soldées.</div>`; return; }
+  h += `<div class="alert ${rel.length ? 'red' : 'ok'}"><b>${fmc(tout.reduce((s, x) => s + reste(x.f), 0))}</b>
+    facturés et non encaissés, dont <b>${fmc(rel.reduce((s, x) => s + reste(x.f), 0))}</b> nécessitant une action aujourd’hui.
+    L’encours n’est pas de l’argent : c’est du travail que vous avez déjà payé et qu’eux n’ont pas encore réglé.</div>`;
+  h += `<div class="card"><div class="body p0"><div class="tw"><table>
+    <thead><tr><th>Facture</th><th>Client</th><th class="num">Reste dû</th><th class="num">Jours</th>
+    <th>Niveau</th><th>Action à mener</th><th></th></tr></thead><tbody>` +
+    tout.map(({ f, s }) => `<tr>
+      <td><b>${esc(f.num)}</b><div class="mini">${fdate(f.date)}</div></td>
+      <td>${esc(nomClient(f.clientId))}<div class="mini">${esc((client(f.clientId) || {}).tel || '')}</div></td>
+      <td class="num"><b>${fmc(reste(f))}</b></td>
+      <td class="num">${s.j}</td>
+      <td><span class="pill ${s.c}">${s.t}</span></td>
+      <td class="mini" style="max-width:330px">${esc(s.action || '')}</td>
+      <td class="num"><button class="btn sm" onclick="fPaiement('${f.id}')">Encaisser</button></td>
+    </tr>`).join('') + `</tbody></table></div></div></div>`;
+  v.innerHTML = h;
+}
+
+/* ═══════════════════ CLIENTS ═══════════════════ */
+function vClients(v, a) {
+  a.innerHTML = `<button class="btn sm" onclick="fClient()">+ Client</button>`;
+  if (!D.clients.length) {
+    v.innerHTML = vide('Aucun client enregistré. Commencez par saisir votre premier client : tout le reste en découle.',
+      `<button class="btn" onclick="fClient()">Ajouter un client</button>`); return;
+  }
+  const q = (v._q || '').toLowerCase();
+  const liste = D.clients.filter(c => !q || (c.nom + ' ' + (c.secteur || '') + ' ' + (c.contact || '')).toLowerCase().includes(q));
+  v.innerHTML = `<div class="toolbar">
+      <input type="search" id="qc" placeholder="Rechercher un client…" value="${esc(v._q || '')}"
+        oninput="document.getElementById('vue')._q=this.value;vClients(document.getElementById('vue'),document.getElementById('actions'));document.getElementById('qc').focus()">
+      <div class="sp"></div><div class="mini">${liste.length} client(s)</div></div>
+    <div class="card"><div class="body p0"><div class="tw"><table>
+    <thead><tr><th>Client</th><th>Secteur</th><th>Contact</th><th>Origine</th>
+    <th class="num">CA total</th><th class="num">Encours</th><th></th></tr></thead><tbody>` +
+    liste.map(c => {
+      const fs = D.factures.filter(f => f.clientId === c.id);
+      const ca = fs.reduce((s, f) => s + totaux(f).net, 0), en = fs.reduce((s, f) => s + reste(f), 0);
+      const ct = D.contrats.filter(x => x.clientId === c.id && x.statut === 'Actif').length;
+      return `<tr><td><b>${esc(c.nom)}</b>${ct ? ' <span class="pill ok">sous contrat</span>' : ''}
+          <div class="mini">${esc(c.niu ? 'NIU ' + c.niu : 'NIU non renseigné')}</div></td>
+        <td class="mini">${esc(c.secteur || '—')}</td>
+        <td class="mini">${esc(c.contact || '—')}<br>${esc(c.tel || '')}</td>
+        <td class="mini">${esc(c.origine || '—')}</td>
+        <td class="num">${fmc(ca)}</td>
+        <td class="num">${en > 0 ? '<b style="color:var(--rouge)">' + fmc(en) + '</b>' : '—'}</td>
+        <td class="num"><button class="btn sec sm" onclick="fClient('${c.id}')">Modifier</button></td></tr>`;
+    }).join('') + `</tbody></table></div></div></div>`;
+}
+
+function fClient(id) {
+  const c = id ? D.clients.find(x => x.id === id) : {};
+  modal(id ? 'Modifier le client' : 'Nouveau client',
+    champ('c_nom', 'Raison sociale *', c.nom) +
+    `<div class="grid2">` + champ('c_sec', 'Secteur', c.secteur) + champ('c_org', 'Origine du contact', c.origine, 'select', '', ['', ...ORIGINES]) + `</div>` +
+    `<div class="grid2">` + champ('c_niu', 'NIU du client', c.niu, 'text', 'Obligatoire sur vos factures entre entreprises') + champ('c_rccm', 'RCCM', c.rccm) + `</div>` +
+    `<div class="grid2">` + champ('c_ct', 'Contact décideur', c.contact) + champ('c_fn', 'Fonction', c.fonction) + `</div>` +
+    `<div class="grid2">` + champ('c_tel', 'Téléphone', c.tel, 'tel') + champ('c_em', 'Courriel', c.email, 'email') + `</div>` +
+    champ('c_ad', 'Adresse', c.adresse) + champ('c_no', 'Notes', c.notes, 'textarea'),
+    (id ? `<button class="btn sec" onclick="supClient('${id}')">Supprimer</button>` : '') +
+    `<button class="btn sec" onclick="fermer()">Annuler</button>
+     <button class="btn" onclick="saveClient('${id || ''}')">Enregistrer</button>`);
+}
+function saveClient(id) {
+  const nom = val('c_nom');
+  if (!nom) { toast('La raison sociale est obligatoire'); return; }
+  const o = { nom, secteur: val('c_sec'), origine: val('c_org'), niu: val('c_niu'), rccm: val('c_rccm'),
+    contact: val('c_ct'), fonction: val('c_fn'), tel: val('c_tel'), email: val('c_em'),
+    adresse: val('c_ad'), notes: val('c_no') };
+  if (id) Object.assign(D.clients.find(x => x.id === id), o);
+  else D.clients.push(Object.assign({ id: uid(), cree: auj() }, o));
+  sauver(); fermer(); router(); toast('Client enregistré');
+}
+function supClient(id) {
+  if (D.factures.some(f => f.clientId === id) || D.devis.some(f => f.clientId === id)) {
+    toast('Impossible : ce client a des devis ou des factures'); return;
+  }
+  D.clients = D.clients.filter(c => c.id !== id); sauver(); fermer(); router(); toast('Client supprimé');
+}
+
+/* ═══════════════════ LIGNES DE DOCUMENT ═══════════════════ */
+let LIGNES = [];
+function tableauLignes() {
+  return `<table class="lignes"><thead><tr><th style="width:48%">Désignation</th><th style="width:13%" class="num">Qté</th>
+    <th style="width:23%" class="num">Prix unitaire</th><th style="width:16%" class="num">Total</th><th></th></tr></thead>
+    <tbody id="tbl">` + LIGNES.map((l, i) => ligneHtml(l, i)).join('') + `</tbody></table>
+    <div style="margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <button class="btn sec sm" onclick="addLigne()">+ Ajouter une ligne</button>
+      <select id="catsel" style="width:auto;min-width:260px;max-width:100%;padding:7px 10px;font-size:13px" onchange="addDepuisCatalogue(this)">
+        ${catalogueOptions()}
+      </select>
+    </div>
+    <div id="recap" style="margin-top:16px">${recapHtml()}</div>`;
+}
+function catalogueOptions() {
+  return '<option value="">Insérer depuis le catalogue…</option>' +
+    CATALOGUE.map(([g, items]) => `<optgroup label="${esc(g)}">` +
+      items.map(([n, p]) => `<option value="${esc(n)}|${p}">${esc(n)} — ${fm(p)} FCFA</option>`).join('') +
+      '</optgroup>').join('');
+}
+function addDepuisCatalogue(sel) {
+  if (!sel.value) return;
+  const i = sel.value.lastIndexOf('|');
+  LIGNES.push({ des: sel.value.slice(0, i), qte: 1, pu: +sel.value.slice(i + 1) });
+  sel.value = ''; redrawLignes();
+}
+function ligneHtml(l, i) {
+  return `<tr data-i="${i}">
+    <td><input value="${esc(l.des || '')}" oninput="majLigne(${i},'des',this.value)" placeholder="Désignation précise, compréhensible sans vous"></td>
+    <td><input type="number" step="any" class="num" value="${l.qte == null ? 1 : l.qte}" oninput="majLigne(${i},'qte',this.value)" style="text-align:right"></td>
+    <td><input type="number" step="any" value="${l.pu == null ? '' : l.pu}" oninput="majLigne(${i},'pu',this.value)" style="text-align:right"></td>
+    <td class="num" id="lt${i}"><b>${fm(N(l.qte) * N(l.pu))}</b></td>
+    <td><button class="btn sec sm" onclick="delLigne(${i})">✕</button></td></tr>`;
+}
+function addLigne() { LIGNES.push({ des: '', qte: 1, pu: '' }); redrawLignes(); }
+function delLigne(i) { LIGNES.splice(i, 1); redrawLignes(); }
+function majLigne(i, k, v) {
+  LIGNES[i][k] = v;
+  const c = document.getElementById('lt' + i);
+  if (c) c.innerHTML = '<b>' + fm(N(LIGNES[i].qte) * N(LIGNES[i].pu)) + '</b>';
+  document.getElementById('recap').innerHTML = recapHtml();
+}
+function redrawLignes() {
+  const t = document.getElementById('tbl');
+  if (t) { t.innerHTML = LIGNES.map((l, i) => ligneHtml(l, i)).join(''); document.getElementById('recap').innerHTML = recapHtml(); }
+}
+function recapHtml() {
+  const rem = nval('d_rem');
+  const ht = LIGNES.reduce((s, l) => s + N(l.qte) * N(l.pu), 0);
+  const net = ht - ht * rem / 100;
+  return `<div style="background:var(--pale);border-radius:10px;padding:14px 16px">
+    <div style="display:flex;justify-content:space-between;font-size:14px"><span>Total hors taxes</span><b>${fmc(ht)}</b></div>
+    ${rem ? `<div style="display:flex;justify-content:space-between;font-size:14px;color:var(--rouge)"><span>Remise ${rem} %</span><b>− ${fmc(ht * rem / 100)}</b></div>` : ''}
+    ${rem ? `<div style="display:flex;justify-content:space-between;font-size:14px"><span>Total hors taxes après remise</span><b>${fmc(net)}</b></div>` : ''}
+    <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--gris)"><span>${esc(D.entreprise.mentionTva)}</span><b>${fmc(Math.round(net * tauxTva()))}</b></div>
+    <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:800;color:var(--encre);
+      border-top:1px solid var(--ligne);margin-top:9px;padding-top:9px"><span>Net à payer TTC</span><span>${fmc(net + Math.round(net * tauxTva()))}</span></div>
+    <div style="font-size:12px;color:var(--gris);margin-top:6px">Soit ${esc(enLettres(net + Math.round(net * tauxTva())))} francs CFA.</div></div>`;
+}
+
+/* ═══════════════════ DEVIS ═══════════════════ */
+const ST_DEVIS = ['Émis', 'Relancé', 'Accepté', 'Perdu', 'Annulé', 'Expiré'];
+
+function vDevis(v, a) {
+  a.innerHTML = `<button class="btn sm" onclick="fDevis()">+ Devis</button>`;
+  if (!D.devis.length) {
+    v.innerHTML = vide('Aucun devis. Le devis est votre outil de vente : chaque affaire commence ici.',
+      `<button class="btn" onclick="fDevis()">Créer un devis</button>`); return;
+  }
+  const liste = D.devis.slice().sort((x, y) => (y.date || '').localeCompare(x.date || ''));
+  const enCours = liste.filter(d => ['Émis', 'Relancé'].includes(d.statut));
+  const acc = liste.filter(d => d.statut === 'Accepté').length;
+  const perd = liste.filter(d => d.statut === 'Perdu').length;
+  const tx = (acc + perd) ? Math.round(acc / (acc + perd) * 100) : 0;
+
+  v.innerHTML = `<div class="kpis">
+    <div class="kpi"><div class="lab">Devis en attente</div><div class="val">${enCours.length}</div>
+      <div class="sub">${fmc(enCours.reduce((s, d) => s + totaux(d).ttc, 0))} sur la table</div></div>
+    <div class="kpi ok"><div class="lab">Taux de transformation</div><div class="val">${tx} %</div>
+      <div class="sub">${acc} gagné(s) · ${perd} perdu(s) — objectif 40 %</div></div>
+    <div class="kpi warn"><div class="lab">Prochain numéro</div><div class="val" style="font-size:19px">${nextNum('DEV', D.devis)}</div>
+      <div class="sub">Numérotation continue, sans trou</div></div>
+  </div>
+  <div class="card"><div class="body p0"><div class="tw"><table>
+  <thead><tr><th>N°</th><th>Client</th><th>Objet</th><th class="num">Montant</th><th>Statut</th><th></th></tr></thead><tbody>` +
+    liste.map(d => {
+      const exp = ['Émis', 'Relancé'].includes(d.statut) && jours(d.date) > N(d.validite || 15);
+      return `<tr><td><b>${esc(d.num)}</b><div class="mini">${fdate(d.date)}${exp ? ' · <span style="color:var(--rouge)">expiré</span>' : ''}</div></td>
+      <td>${esc(nomClient(d.clientId))}</td>
+      <td class="mini" style="max-width:280px">${esc(d.objet || '—')}</td>
+      <td class="num"><b>${fmc(totaux(d).ttc)}</b></td>
+      <td><span class="pill ${d.statut === 'Accepté' ? 'ok' : d.statut === 'Perdu' || d.statut === 'Annulé' ? 'red' : 'blue'}">${esc(d.statut)}</span></td>
+      <td class="num" style="white-space:nowrap">
+        <button class="btn sec sm" onclick="imprimer('devis','${d.id}')">Imprimer</button>
+        ${d.statut === 'Accepté' && !D.factures.some(f => f.devisId === d.id)
+          ? `<button class="btn sm" onclick="devisEnFacture('${d.id}')">→ Facture</button>` : ''}
+        <button class="btn sec sm" onclick="fDevis('${d.id}')">Ouvrir</button></td></tr>`;
+    }).join('') + `</tbody></table></div></div></div>`;
+}
+
+function fDevis(id) {
+  const d = id ? D.devis.find(x => x.id === id) : { date: auj(), validite: N(D.entreprise.validiteDevis) || 15, statut: 'Émis', remise: 0, proba: 50 };
+  LIGNES = id ? JSON.parse(JSON.stringify(d.lignes || [])) : [{ des: '', qte: 1, pu: '' }];
+  if (!LIGNES.length) LIGNES = [{ des: '', qte: 1, pu: '' }];
+  modal(id ? 'Devis ' + d.num : 'Nouveau devis',
+    `<div class="grid3">` + champ('d_date', 'Date d’émission', d.date, 'date') +
+      champ('d_val', 'Validité (jours)', d.validite, 'number', 'Ne dépassez pas 15 jours si le devis comporte du matériel') +
+      champ('d_st', 'Statut', d.statut, 'select', '', ST_DEVIS) + `</div>` +
+    selClient('d_cl', d.clientId) +
+    champ('d_obj', 'Objet', d.objet, 'textarea', 'Reprenez le besoin du client avec ses mots. C’est la partie la plus lue du devis.') +
+    `<h4 style="font-size:12.5px;font-weight:800;letter-spacing:1px;color:var(--indigo);text-transform:uppercase;margin:18px 0 10px">Détail de la prestation</h4>` +
+    tableauLignes() +
+    `<div class="grid2" style="margin-top:16px">` +
+      champ('d_rem', 'Remise (%)', d.remise || 0, 'number', 'Toujours contre une contrepartie : engagement, volume, référence') +
+      champ('d_proba', 'Probabilité (%)', d.proba == null ? 50 : d.proba, 'number') + `</div>` +
+    champ('d_excl', 'Ce qui n’est PAS inclus', d.exclusions, 'textarea',
+      'Votre meilleure protection contre la dérive de périmètre. Une ligne par élément exclu.'),
+    (id ? `<button class="btn sec" onclick="supDoc('devis','${id}')">Supprimer</button>` : '') +
+    `<button class="btn sec" onclick="fermer()">Annuler</button>
+     <button class="btn" onclick="saveDevis('${id || ''}')">Enregistrer</button>`, true);
+  const r = document.getElementById('d_rem');
+  if (r) r.addEventListener('input', () => { document.getElementById('recap').innerHTML = recapHtml(); });
+}
+function saveDevis(id) {
+  if (!val('d_cl')) { toast('Choisissez un client'); return; }
+  LIGNES = LIGNES.filter(l => (l.des || '').trim() || N(l.pu));
+  if (!LIGNES.length) { toast('Ajoutez au moins une ligne'); return; }
+  const o = { date: val('d_date') || auj(), validite: nval('d_val'), statut: val('d_st'), clientId: val('d_cl'),
+    objet: val('d_obj'), lignes: LIGNES, remise: nval('d_rem'), proba: nval('d_proba'), exclusions: val('d_excl') };
+  if (id) Object.assign(D.devis.find(x => x.id === id), o);
+  else D.devis.push(Object.assign({ id: uid(), num: nextNum('DEV', D.devis) }, o));
+  sauver(); fermer(); router(); toast('Devis enregistré');
+}
+function supDoc(type, id) { D[type] = D[type].filter(x => x.id !== id); sauver(); fermer(); router(); toast('Supprimé'); }
+
+function devisEnFacture(id) {
+  const d = D.devis.find(x => x.id === id);
+  const f = { id: uid(), num: nextNum('FAC', D.factures), date: auj(),
+    echeance: plusJours(auj(), N(D.entreprise.delaiPaiement) || 30),
+    clientId: d.clientId, devisId: d.id, objet: d.objet, lignes: JSON.parse(JSON.stringify(d.lignes)),
+    remise: d.remise, acompte: 0, paiements: [] };
+  D.factures.push(f); sauver(); location.hash = '#factures'; router();
+  toast('Facture ' + f.num + ' créée depuis le devis');
+}
+
+/* ═══════════════════ FACTURES ═══════════════════ */
+function vFactures(v, a) {
+  a.innerHTML = `<button class="btn sm" onclick="fFacture()">+ Facture</button>`;
+  if (!D.factures.length) {
+    v.innerHTML = vide('Aucune facture. Facturez à la livraison, jamais en fin de mois : chaque jour de retard est un jour d’encaissement perdu.',
+      `<button class="btn" onclick="fFacture()">Créer une facture</button>`); return;
+  }
+  const liste = D.factures.slice().sort((x, y) => (y.date || '').localeCompare(x.date || ''));
+  v.innerHTML = `<div class="kpis">
+    <div class="kpi"><div class="lab">Facturé ${anneeEnCours()}</div><div class="val">${fm(caFacture())}</div><div class="sub">francs CFA</div></div>
+    <div class="kpi ok"><div class="lab">Encaissé</div><div class="val">${fm(caEncaisse())}</div>
+      <div class="sub">${caFacture() ? Math.round(caEncaisse() / caFacture() * 100) : 0} % du facturé</div></div>
+    <div class="kpi red"><div class="lab">Reste à encaisser</div><div class="val">${fm(encours())}</div>
+      <div class="sub">${D.factures.filter(f => reste(f) > 0).length} facture(s) ouverte(s)</div></div>
+  </div>
+  <div class="card"><div class="body p0"><div class="tw"><table>
+  <thead><tr><th>N°</th><th>Client</th><th class="num">Montant</th><th class="num">Encaissé</th>
+  <th class="num">Reste</th><th>État</th><th></th></tr></thead><tbody>` +
+    liste.map(f => { const s = statutFacture(f), t = totaux(f).ttc, enc = N(f.acompte) + paye(f);
+      return `<tr><td><b>${esc(f.num)}</b><div class="mini">${fdate(f.date)} · éch. ${fdate(f.echeance)}</div></td>
+      <td>${esc(nomClient(f.clientId))}</td>
+      <td class="num">${fmc(t)}</td>
+      <td class="num">${fmc(enc)}</td>
+      <td class="num">${reste(f) > 0 ? '<b style="color:var(--rouge)">' + fmc(reste(f)) + '</b>' : '—'}</td>
+      <td><span class="pill ${s.c}">${s.t}</span>${reste(f) > 0 && s.j > 0 ? `<div class="mini">${s.j} j</div>` : ''}</td>
+      <td class="num" style="white-space:nowrap">
+        ${reste(f) > 0 ? `<button class="btn sm" onclick="fPaiement('${f.id}')">Encaisser</button>` : ''}
+        <button class="btn sec sm" onclick="imprimer('facture','${f.id}')">Imprimer</button>
+        <button class="btn sec sm" onclick="fFacture('${f.id}')">Ouvrir</button></td></tr>`; }).join('') +
+    `</tbody></table></div></div></div>`;
+}
+
+function fFacture(id) {
+  const f = id ? D.factures.find(x => x.id === id) : { date: auj(), echeance: plusJours(auj(), N(D.entreprise.delaiPaiement) || 30), remise: 0, acompte: 0, paiements: [] };
+  LIGNES = id ? JSON.parse(JSON.stringify(f.lignes || [])) : [{ des: '', qte: 1, pu: '' }];
+  if (!LIGNES.length) LIGNES = [{ des: '', qte: 1, pu: '' }];
+  const hist = (f.paiements || []).length
+    ? `<h4 style="font-size:12.5px;font-weight:800;letter-spacing:1px;color:var(--indigo);text-transform:uppercase;margin:18px 0 10px">Encaissements</h4>
+       <table><tbody>` + f.paiements.map((p, i) => `<tr><td>${fdate(p.date)}</td><td class="mini">${esc(p.mode || '')}</td>
+       <td class="num"><b>${fmc(p.montant)}</b></td>
+       <td class="num"><button class="btn sec sm" onclick="delPaiement('${id}',${i})">✕</button></td></tr>`).join('') + `</tbody></table>` : '';
+  modal(id ? 'Facture ' + f.num : 'Nouvelle facture',
+    `<div class="grid2">` + champ('d_date', 'Date d’émission', f.date, 'date') +
+      champ('f_ech', 'Échéance de paiement', f.echeance, 'date') + `</div>` +
+    selClient('d_cl', f.clientId) +
+    champ('d_obj', 'Objet', f.objet, 'textarea') +
+    `<h4 style="font-size:12.5px;font-weight:800;letter-spacing:1px;color:var(--indigo);text-transform:uppercase;margin:18px 0 10px">Détail</h4>` +
+    tableauLignes() +
+    `<div class="grid2" style="margin-top:16px">` + champ('d_rem', 'Remise (%)', f.remise || 0, 'number') +
+      champ('f_ac', 'Acompte déjà réglé', f.acompte || 0, 'number') + `</div>` + hist,
+    (id ? `<button class="btn sec" onclick="supDoc('factures','${id}')">Supprimer</button>` : '') +
+    `<button class="btn sec" onclick="fermer()">Annuler</button>
+     <button class="btn" onclick="saveFacture('${id || ''}')">Enregistrer</button>`, true);
+  const r = document.getElementById('d_rem');
+  if (r) r.addEventListener('input', () => { document.getElementById('recap').innerHTML = recapHtml(); });
+}
+function saveFacture(id) {
+  if (!val('d_cl')) { toast('Choisissez un client'); return; }
+  LIGNES = LIGNES.filter(l => (l.des || '').trim() || N(l.pu));
+  if (!LIGNES.length) { toast('Ajoutez au moins une ligne'); return; }
+  const o = { date: val('d_date') || auj(), echeance: val('f_ech'), clientId: val('d_cl'), objet: val('d_obj'),
+    lignes: LIGNES, remise: nval('d_rem'), acompte: nval('f_ac') };
+  if (id) Object.assign(D.factures.find(x => x.id === id), o);
+  else D.factures.push(Object.assign({ id: uid(), num: nextNum('FAC', D.factures), paiements: [] }, o));
+  sauver(); fermer(); router(); toast('Facture enregistrée');
+}
+function fPaiement(id) {
+  const f = D.factures.find(x => x.id === id);
+  modal('Encaissement — ' + f.num,
+    `<div class="alert info">Reste dû sur cette facture : <b>${fmc(reste(f))}</b></div>` +
+    `<div class="grid2">` + champ('p_date', 'Date d’encaissement', auj(), 'date') +
+      champ('p_mt', 'Montant reçu', reste(f), 'number') + `</div>` +
+    champ('p_mode', 'Moyen de paiement', 'Virement', 'select', '', ['Virement', 'MTN Mobile Money', 'Orange Money', 'Espèces', 'Chèque']),
+    `<button class="btn sec" onclick="fermer()">Annuler</button>
+     <button class="btn" onclick="savePaiement('${id}')">Enregistrer l’encaissement</button>`);
+}
+function savePaiement(id) {
+  const f = D.factures.find(x => x.id === id);
+  const m = nval('p_mt');
+  if (m <= 0) { toast('Montant invalide'); return; }
+  (f.paiements = f.paiements || []).push({ date: val('p_date') || auj(), montant: m, mode: val('p_mode') });
+  sauver(); fermer(); router();
+  toast(reste(f) <= 0 ? 'Facture soldée' : 'Encaissement enregistré — reste ' + fmc(reste(f)));
+}
+function delPaiement(id, i) {
+  const f = D.factures.find(x => x.id === id);
+  f.paiements.splice(i, 1); sauver(); fermer(); router(); toast('Encaissement supprimé');
+}
+
+/* ═══════════════════ CONTRATS ═══════════════════ */
+function vContrats(v, a) {
+  a.innerHTML = `<button class="btn sm" onclick="fContrat()">+ Contrat</button>`;
+  const rec = recurrentMensuel();
+  if (!D.contrats.length) {
+    v.innerHTML = `<div class="alert info"><b>C’est ici que se joue la solidité de votre entreprise.</b>
+      Un contrat récurrent se facture douze fois par an sans nouvel effort commercial. Un projet ponctuel, une seule.</div>` +
+      vide('Aucun contrat récurrent.', `<button class="btn" onclick="fContrat()">Créer un contrat</button>`); return;
+  }
+  v.innerHTML = `<div class="kpis">
+    <div class="kpi ok"><div class="lab">Revenu récurrent mensuel</div><div class="val">${fm(rec)}</div>
+      <div class="sub">${fmc(rec * 12)} sur l’année</div></div>
+    <div class="kpi"><div class="lab">Contrats actifs</div><div class="val">${D.contrats.filter(c => c.statut === 'Actif').length}</div>
+      <div class="sub">sur ${D.contrats.length} au total</div></div>
+    <div class="kpi warn"><div class="lab">Panier moyen</div>
+      <div class="val">${fm(D.contrats.filter(c => c.statut === 'Actif').length ? rec / D.contrats.filter(c => c.statut === 'Actif').length : 0)}</div>
+      <div class="sub">par contrat et par mois</div></div>
+  </div>
+  <div class="card"><div class="body p0"><div class="tw"><table>
+  <thead><tr><th>N°</th><th>Client</th><th>Formule</th><th class="num">Mensuel</th><th>Période</th><th>État</th><th></th></tr></thead><tbody>` +
+    D.contrats.map(c => {
+      const fin = c.dateDebut ? plusJours(c.dateDebut, 30 * N(c.duree || 12)) : '';
+      const opts = (c.options || []).reduce((s, o) => s + N(o.prix), 0);
+      const reste = fin ? jours(auj(), fin) : 0;
+      return `<tr><td><b>${esc(c.num)}</b></td><td>${esc(nomClient(c.clientId))}</td>
+        <td class="mini">${esc(c.formule)}${opts ? `<br>+ options ${fmc(opts)}` : ''}</td>
+        <td class="num"><b>${fmc(N(c.montantMensuel) + opts)}</b></td>
+        <td class="mini">${fdate(c.dateDebut)} → ${fdate(fin)}${c.statut === 'Actif' && reste < 90 && reste > 0 ? `<br><span style="color:var(--warn)">échéance dans ${reste} j</span>` : ''}</td>
+        <td><span class="pill ${c.statut === 'Actif' ? 'ok' : 'gris'}">${esc(c.statut)}</span></td>
+        <td class="num"><button class="btn sec sm" onclick="fContrat('${c.id}')">Ouvrir</button></td></tr>`;
+    }).join('') + `</tbody></table></div></div></div>`;
+}
+function fContrat(id) {
+  const c = id ? D.contrats.find(x => x.id === id) : { dateDebut: auj(), duree: 12, statut: 'Actif', montantMensuel: 240000, formule: FORMULES[1].nom };
+  modal(id ? 'Contrat ' + c.num : 'Nouveau contrat récurrent',
+    selClient('k_cl', c.clientId) +
+    `<div class="grid2">` +
+      champ('k_form', 'Formule', c.formule, 'select', '', FORMULES.map(f => f.nom)) +
+      champ('k_mt', 'Montant mensuel HT', c.montantMensuel, 'number', 'Prix plancher du catalogue') + `</div>` +
+    `<div class="grid3">` + champ('k_deb', 'Date d’effet', c.dateDebut, 'date') +
+      champ('k_dur', 'Durée (mois)', c.duree || 12, 'number') +
+      champ('k_st', 'Statut', c.statut, 'select', '', ['Actif', 'Suspendu', 'Terminé', 'Période d’essai']) + `</div>` +
+    champ('k_no', 'Périmètre couvert et notes', c.notes, 'textarea', 'Nombre de postes, serveurs, sites, options souscrites'),
+    (id ? `<button class="btn sec" onclick="supDoc('contrats','${id}')">Supprimer</button>` : '') +
+    `<button class="btn sec" onclick="fermer()">Annuler</button>
+     <button class="btn" onclick="saveContrat('${id || ''}')">Enregistrer</button>`);
+  const s = document.getElementById('k_form');
+  if (s) s.addEventListener('change', () => {
+    const f = FORMULES.find(x => x.nom === s.value);
+    if (f) document.getElementById('k_mt').value = f.prix;
+  });
+}
+function saveContrat(id) {
+  if (!val('k_cl')) { toast('Choisissez un client'); return; }
+  const o = { clientId: val('k_cl'), formule: val('k_form'), montantMensuel: nval('k_mt'),
+    dateDebut: val('k_deb'), duree: nval('k_dur'), statut: val('k_st'), notes: val('k_no') };
+  if (id) Object.assign(D.contrats.find(x => x.id === id), o);
+  else D.contrats.push(Object.assign({ id: uid(), num: nextNum('CTR', D.contrats), options: [] }, o));
+  sauver(); fermer(); router(); toast('Contrat enregistré');
+}
+
+/* ═══════════════════ INTERVENTIONS ═══════════════════ */
+const GRAVITES = ['Critique', 'Majeur', 'Mineur', 'Demande d’évolution'];
+const GTI = { 'Critique': 4, 'Majeur': 8, 'Mineur': 24, 'Demande d’évolution': 48 };
+
+function vInterventions(v, a) {
+  a.innerHTML = `<button class="btn sm" onclick="fInter()">+ Intervention</button>`;
+  if (!D.interventions.length) {
+    v.innerHTML = `<div class="alert info">Le journal des interventions est ce qui rend visible un travail qui, bien fait,
+      ne se voit pas. C’est lui qui alimente votre rapport mensuel — et qui justifie l’abonnement au moment du renouvellement.</div>` +
+      vide('Aucune intervention enregistrée.', `<button class="btn" onclick="fInter()">Enregistrer une intervention</button>`); return;
+  }
+  const liste = D.interventions.slice().sort((x, y) => (y.date || '').localeCompare(x.date || ''));
+  const m = liste.filter(i => (i.date || '').slice(0, 7) === auj().slice(0, 7));
+  const nonFact = liste.filter(i => i.facturable && !i.factureId);
+  v.innerHTML = `<div class="kpis">
+    <div class="kpi"><div class="lab">Ce mois-ci</div><div class="val">${m.length}</div>
+      <div class="sub">${m.reduce((s, i) => s + N(i.duree), 0)} h consacrées</div></div>
+    <div class="kpi warn"><div class="lab">À facturer</div><div class="val">${nonFact.length}</div>
+      <div class="sub">intervention(s) hors contrat non facturée(s)</div></div>
+    <div class="kpi ok"><div class="lab">Total enregistré</div><div class="val">${liste.length}</div>
+      <div class="sub">depuis le début</div></div>
+  </div>
+  <div class="card"><div class="body p0"><div class="tw"><table>
+  <thead><tr><th>Date</th><th>Client</th><th>Gravité</th><th>Description</th><th class="num">Durée</th><th>Facturation</th><th></th></tr></thead><tbody>` +
+    liste.slice(0, 120).map(i => `<tr>
+      <td class="mini">${fdate(i.date)}</td>
+      <td>${esc(nomClient(i.clientId))}</td>
+      <td><span class="pill ${i.gravite === 'Critique' ? 'red' : i.gravite === 'Majeur' ? 'warn' : 'gris'}">${esc(i.gravite)}</span></td>
+      <td class="mini" style="max-width:340px">${esc(i.description || '')}</td>
+      <td class="num">${N(i.duree)} h</td>
+      <td>${i.facturable ? (i.factureId ? '<span class="pill ok">facturée</span>' : '<span class="pill warn">à facturer</span>') : '<span class="pill gris">sous contrat</span>'}</td>
+      <td class="num"><button class="btn sec sm" onclick="fInter('${i.id}')">Ouvrir</button></td></tr>`).join('') +
+    `</tbody></table></div></div></div>`;
+}
+function fInter(id) {
+  const i = id ? D.interventions.find(x => x.id === id) : { date: auj(), gravite: 'Mineur', duree: 1, facturable: false };
+  modal(id ? 'Intervention' : 'Nouvelle intervention',
+    `<div class="grid2">` + champ('i_date', 'Date', i.date, 'date') + selClient('i_cl', i.clientId) + `</div>` +
+    `<div class="grid3">` + champ('i_gr', 'Gravité', i.gravite, 'select', '', GRAVITES) +
+      champ('i_du', 'Durée (heures)', i.duree, 'number') +
+      champ('i_fa', 'Facturable', i.facturable ? 'Oui — hors contrat' : 'Non — incluse au contrat', 'select', '',
+        ['Non — incluse au contrat', 'Oui — hors contrat']) + `</div>` +
+    champ('i_de', 'Ce qui a été fait', i.description, 'textarea',
+      'Écrivez-le pour le client, pas pour vous : c’est ce texte qui figurera dans le rapport mensuel.') +
+    `<div class="alert info">Délai d’intervention garanti pour une gravité « ${esc(i.gravite)} » :
+      <b>${GTI[i.gravite] || 24} heures ouvrées</b> en formule Business.</div>`,
+    (id ? `<button class="btn sec" onclick="supDoc('interventions','${id}')">Supprimer</button>` : '') +
+    `<button class="btn sec" onclick="fermer()">Annuler</button>
+     <button class="btn" onclick="saveInter('${id || ''}')">Enregistrer</button>`);
+}
+function saveInter(id) {
+  if (!val('i_cl')) { toast('Choisissez un client'); return; }
+  const o = { date: val('i_date') || auj(), clientId: val('i_cl'), gravite: val('i_gr'),
+    duree: nval('i_du'), facturable: val('i_fa').startsWith('Oui'), description: val('i_de') };
+  if (id) Object.assign(D.interventions.find(x => x.id === id), o);
+  else D.interventions.push(Object.assign({ id: uid() }, o));
+  sauver(); fermer(); router(); toast('Intervention enregistrée');
+}
+
+/* ═══════════════════ PROSPECTION ═══════════════════ */
+function vPipeline(v, a) {
+  a.innerHTML = `<label class="btn sec sm" for="suiFile">Importer Suivi_Prospects.csv</label>
+    <input type="file" id="suiFile" accept=".csv,text/csv,text/plain" style="display:none" onchange="suiviImporter(this)">
+    <button class="btn sec sm" onclick="suiviExporter()">Exporter</button>
+    <button class="btn sm" onclick="fProspect()">+ Prospect</button>`;
+  if (!D.prospects.length) {
+    v.innerHTML = `<div class="alert info"><b>La règle des deux noms.</b> À la fin de chaque mission réussie,
+      demandez au client deux dirigeants à qui vous pourriez être utile. Notez-les ici le soir même —
+      un nom noté et non reporté est un nom perdu.</div>` +
+      vide('Aucun prospect. Constituez votre fichier de 100 cibles : sans fichier, pas de prospection.',
+        `<button class="btn" onclick="fProspect()">Ajouter un prospect</button>`); return;
+  }
+  const actifs = D.prospects.filter(p => !['Gagné', 'Perdu'].includes(p.etape));
+  const sansAction = actifs.filter(p => !p.dateAction);
+  const enRetard = actifs.filter(p => p.dateAction && p.dateAction < auj());
+  let h = '';
+  if (sansAction.length) h += `<div class="alert warn"><b>${sansAction.length} affaire(s) sans prochaine action datée.</b>
+    Une affaire sans prochaine action est une affaire déjà perdue.</div>`;
+  if (enRetard.length) h += `<div class="alert red"><b>${enRetard.length} action(s) en retard.</b> À traiter aujourd’hui.</div>`;
+
+  h += `<div class="kpis">
+    <div class="kpi"><div class="lab">Affaires en cours</div><div class="val">${actifs.length}</div>
+      <div class="sub">${fmc(actifs.reduce((s, p) => s + N(p.montant), 0))} de potentiel</div></div>
+    <div class="kpi warn"><div class="lab">Valeur pondérée</div><div class="val">${fm(pipelinePondere())}</div>
+      <div class="sub">montant × probabilité</div></div>
+    <div class="kpi ok"><div class="lab">Gagnées</div><div class="val">${D.prospects.filter(p => p.etape === 'Gagné').length}</div>
+      <div class="sub">${D.prospects.filter(p => p.etape === 'Perdu').length} perdue(s)</div></div>
+  </div>`;
+
+  h += `<div class="card"><h3>Par étape</h3><div class="body">` +
+    ETAPES.slice(0, 5).map(e => {
+      const l = D.prospects.filter(p => p.etape === e);
+      const mt = l.reduce((s, p) => s + N(p.montant), 0);
+      const pc = actifs.length ? l.length / actifs.length * 100 : 0;
+      return `<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:13.5px">
+        <b>${esc(e)}</b><span class="mini">${l.length} · ${fmc(mt)}</span></div>
+        <div class="bar"><i style="width:${pc}%"></i></div></div>`;
+    }).join('') + `</div></div>`;
+
+  h += `<div class="card"><div class="body p0"><div class="tw"><table>
+    <thead><tr><th>Prospect</th><th>Origine</th><th>Étape</th><th class="num">Montant</th>
+    <th class="num">Prob.</th><th>Prochaine action</th><th></th></tr></thead><tbody>` +
+    D.prospects.slice().sort((x, y) => (x.dateAction || '9999').localeCompare(y.dateAction || '9999')).map(p => `<tr>
+      <td><b>${esc(p.nom)}</b><div class="mini">${esc(p.contact || '')} ${esc(p.tel || '')}</div>${p.besoin ? `<div class="mini"><i>${esc(p.besoin.length > 90 ? p.besoin.slice(0, 90) + '…' : p.besoin)}</i></div>` : ''}</td>
+      <td class="mini">${esc(p.origine || '—')}</td>
+      <td><span class="pill ${p.etape === 'Gagné' ? 'ok' : p.etape === 'Perdu' ? 'red' : 'blue'}">${esc(p.etape)}</span>${p.statutSuivi ? `<div class="mini">${esc(p.statutSuivi)}</div>` : ''}</td>
+      <td class="num">${fmc(p.montant)}</td>
+      <td class="num">${N(p.proba)} %</td>
+      <td class="mini">${p.dateAction ? (p.dateAction < auj() ? '<b style="color:var(--rouge)">' + fdate(p.dateAction) + '</b>' : fdate(p.dateAction)) : '<span style="color:var(--warn)">à définir</span>'}
+        <br>${esc(p.prochaineAction || '')}</td>
+      <td class="num"><button class="btn sec sm" onclick="fProspect('${p.id}')">Ouvrir</button></td></tr>`).join('') +
+    `</tbody></table></div></div></div>`;
+  v.innerHTML = h;
+}
+function fProspect(id) {
+  const p = id ? D.prospects.find(x => x.id === id) : { etape: 'Identifié', proba: 20, dateAction: plusJours(auj(), 7), dateContact: auj(), statutSuivi: 'Nouveau' };
+  const ss = p.statutSuivi || ETAPE_VERS_SUIVI[p.etape] || 'Nouveau';
+  modal(id ? 'Prospect — ' + p.nom : 'Nouveau prospect',
+    champ('x_nom', 'Entreprise *', p.nom) +
+    `<div class="grid2">` + champ('x_ct', 'Contact décideur', p.contact) + champ('x_tel', 'Téléphone', p.tel, 'tel') + `</div>` +
+    `<div class="grid2">` + champ('x_ml', 'Courriel', p.mail, 'email') + champ('x_dc', 'Date du premier contact', p.dateContact, 'date') + `</div>` +
+    `<div class="grid2">` + champ('x_sec', 'Secteur', p.secteur) + champ('x_ssec', 'Sous-secteur ou domaine d’activité', p.sousSecteur) + `</div>` +
+    `<div class="grid2">` + champ('x_org', 'Origine (canal)', p.origine, 'select', '', ['', ...ORIGINES]) +
+      champ('x_dm', 'Domaine', p.domaine, 'text', 'Conseil, cybersécurité, réseau, maintenance, ERP, applications…') +
+      champ('x_ss', 'Statut du suivi', ss, 'select', 'Suit l’étape, et inversement.', STATUTS_SUIVI) + `</div>` +
+    champ('x_bs', 'Besoin exprimé', p.besoin, 'textarea') +
+    `<div class="grid3">` + champ('x_et', 'Étape', p.etape, 'select', '', ETAPES) +
+      champ('x_mt', 'Montant estimé', p.montant, 'number') +
+      champ('x_pr', 'Probabilité (%)', p.proba, 'number', '20 après RDV, 50 après proposition, 80 en négociation') + `</div>` +
+    `<div class="grid2">` + champ('x_pa', 'Prochaine action', p.prochaineAction, 'text', 'Toujours renseignée. Sans elle, l’affaire meurt.') +
+      champ('x_da', 'Date de l’action', p.dateAction, 'date') + `</div>` +
+    champ('x_no', 'Notes et motif de perte', p.notes, 'textarea',
+      'Notez le motif quand vous perdez : c’est votre seule source d’apprentissage commercial.'),
+    (id ? `<button class="btn sec" onclick="supDoc('prospects','${id}')">Supprimer</button>` +
+          (p.etape !== 'Gagné' ? `<button class="btn sec" onclick="prospectEnClient('${id}')">Convertir en client</button>` : '') : '') +
+    `<button class="btn sec" onclick="fermer()">Annuler</button>
+     <button class="btn" onclick="saveProspect('${id || ''}')">Enregistrer</button>`);
+}
+function saveProspect(id) {
+  const nom = val('x_nom');
+  if (!nom) { toast('Le nom de l’entreprise est obligatoire'); return; }
+  const prev = id ? D.prospects.find(x => x.id === id) : null;
+  let etape = val('x_et'), ss = val('x_ss');
+  if (prev) {
+    const ssPrev = prev.statutSuivi || ETAPE_VERS_SUIVI[prev.etape] || 'Nouveau';
+    if (ss !== ssPrev && SUIVI_VERS_ETAPE[ss]) etape = SUIVI_VERS_ETAPE[ss];          // le statut a été changé : l'étape suit
+    else if (etape !== prev.etape) ss = ETAPE_VERS_SUIVI[etape] || ss;                // l'étape a été changée : le statut suit
+  } else if (ss !== 'Nouveau' && etape === 'Identifié' && SUIVI_VERS_ETAPE[ss]) etape = SUIVI_VERS_ETAPE[ss];
+  else if (etape !== 'Identifié' && ss === 'Nouveau') ss = ETAPE_VERS_SUIVI[etape] || ss;
+  const o = { nom, contact: val('x_ct'), tel: val('x_tel'), mail: val('x_ml'), dateContact: val('x_dc'), secteur: val('x_sec'), sousSecteur: val('x_ssec'),
+    origine: val('x_org'), domaine: val('x_dm'), besoin: val('x_bs'), statutSuivi: ss,
+    etape, montant: nval('x_mt'), proba: nval('x_pr'),
+    prochaineAction: val('x_pa'), dateAction: val('x_da'), notes: val('x_no') };
+  if (prev) Object.assign(prev, o);
+  else D.prospects.push(Object.assign({ id: uid() }, o));
+  sauver(); fermer(); router(); toast('Prospect enregistré');
+}
+function prospectEnClient(id) {
+  const p = D.prospects.find(x => x.id === id);
+  D.clients.push({ id: uid(), nom: p.nom, secteur: p.secteur, contact: p.contact, tel: p.tel,
+    origine: p.origine, notes: p.notes, cree: auj() });
+  p.etape = 'Gagné';
+  sauver(); fermer(); location.hash = '#clients'; router(); toast('Converti en client');
+}
+
+/* ═══════════════════ VISITES TERRAIN, CIBLES ET SUIVI ═══════════════════
+   Version numérique de la « Fiche de visite et aide-mémoire » de la pochette de prospection,
+   et reprise des fichiers Cibles_Terrain.csv et Suivi_Prospects.csv.
+   Les données restent dans D : sur l'appareil (chiffrées si le code d'accès est activé) et, si la
+   synchronisation est activée, dans le document Firestore du propriétaire. Aucune donnée de prospect
+   ne figure dans le code : les listes s'importent depuis les fichiers CSV, lus localement. */
+
+const TOURNEES = {
+  '1': 'Biyem-Assi, Damas, Mendong, Obili',
+  '2': 'Centre-ville, Olézoa, Mokolo, Mvog',
+  '3': 'Bastos, Omnisport, Nlongkak',
+  '4': 'Ekounou, Emombo, Mvan, Mimboman',
+  '5': 'Tsinga, Etoa-Meki, Elig-Essono, Essos',
+  'P': 'Prescripteurs et partenaires'
+};
+const ISSUES = [['', '— à définir —'], ['diagnostic', 'Diagnostic fixé'], ['rappel', 'Rappel prévu'],
+  ['plus_tard', 'À recontacter plus tard'], ['pas_interesse', 'Pas intéressé']];
+const ISSUE_LIB = { diagnostic: 'Diagnostic fixé', rappel: 'Rappel prévu', plus_tard: 'À recontacter plus tard', pas_interesse: 'Pas intéressé' };
+const ISSUE_PILL = { diagnostic: 'ok', rappel: 'blue', plus_tard: 'warn', pas_interesse: 'red' };
+const ROLES = [['', '—'], ['decide', 'Elle décide'], ['recommande', 'Elle recommande'], ['autre', 'Décideur à rencontrer']];
+const STATUT_CIBLE = { diagnostic: 'Diagnostic fixé', rappel: 'À rappeler', plus_tard: 'À recontacter plus tard', pas_interesse: 'Pas intéressé', '': 'Visité' };
+
+/* Vocabulaire du fichier Suivi_Prospects.csv (équipe numérique) et correspondance avec les étapes de l'application. */
+const STATUTS_SUIVI = ['Nouveau', 'Répondu', 'Diagnostic planifié', 'Diagnostic fait', 'Proposition envoyée', 'Gagné', 'Perdu', 'En pause'];
+const SUIVI_VERS_ETAPE = { 'Nouveau': 'Identifié', 'Répondu': 'Contacté', 'Diagnostic planifié': 'Contacté', 'Diagnostic fait': 'RDV tenu',
+  'Proposition envoyée': 'Proposition remise', 'Gagné': 'Gagné', 'Perdu': 'Perdu' };
+const ETAPE_VERS_SUIVI = { 'Identifié': 'Nouveau', 'Contacté': 'Répondu', 'RDV tenu': 'Diagnostic fait', 'Proposition remise': 'Proposition envoyée',
+  'Négociation': 'Proposition envoyée', 'Gagné': 'Gagné', 'Perdu': 'Perdu' };
+const ISSUE_VERS_SUIVI = { diagnostic: 'Diagnostic planifié', rappel: 'Répondu', plus_tard: 'En pause', pas_interesse: 'Perdu', '': 'Répondu' };
+
+const QUESTIONS = [
+  ['q1', 'Q1 · trois jours sans ordinateurs', 'Comment votre entreprise fonctionnerait-elle si vos ordinateurs étaient inaccessibles pendant trois jours ?'],
+  ['q23', 'Q2 / Q3 · qui s’en occupe, délai de réparation', 'Qui s’occupe de votre informatique aujourd’hui, et comment cela se passe-t-il ? Quand vous avez un problème, combien de temps s’écoule avant qu’il soit réglé ?'],
+  ['q4', 'Q4 · sauvegardes, dernière restauration', 'Où sont vos données aujourd’hui, et à quand remonte la dernière fois où vous avez vérifié qu’une sauvegarde se restaure correctement ?'],
+  ['q5', 'Q5 · coût informatique de l’an dernier', 'Combien avez-vous dépensé en informatique l’an dernier, toutes dépenses confondues ?'],
+  ['q67', 'Q6 / Q7 · incident récent, donnée la plus critique', 'Y a-t-il eu un incident ces douze derniers mois ? Que s’est-il passé exactement ? Quelle est la donnée dont la perte serait la plus grave pour vous ?'],
+  ['besoin', 'Besoin principal exprimé', 'Q8 à Q10 : ce qui l’empêche d’avancer avec le numérique, ce qui aura changé dans un an, qui d’autre doit être associé à la décision.']
+];
+
+/* Contenu de l'aide-mémoire de poche (verso de la fiche imprimée). Un seul endroit à modifier. */
+const MEMO = {
+  pitch: [
+    '« D&amp;B Informatique, ce sont des <b>experts de la transformation digitale</b> des PME et des institutions. Nous nous appuyons sur douze années de prestation de services en informatique, dans l’énergie, l’assurance et le numérique.',
+    'Nous voyons toujours le même problème : les PME dépendent complètement de leur informatique, mais aucune n’a les moyens d’un directeur informatique à plein temps. Alors elles subissent.',
+    'Nous jouons ce rôle pour elles, quelques jours par mois : nous établissons l’état des lieux, puis nous prenons en charge ce qui fait passer l’entreprise au numérique — le réseau, la sécurité, les applications, la maintenance.',
+    'Concrètement : vous savez enfin ce que votre informatique vous coûte, et vous ne vous arrêtez plus de travailler à cause d’une panne. »'
+  ],
+  accueil: [
+    '« Bonjour, nous sommes D&amp;B Informatique, experts en transformation digitale des PME et des institutions. Nous passons déposer une présentation pour la direction. À qui puis-je la remettre, et quand est-il préférable de rappeler ? »',
+    'On repart avec <b>un nom, un numéro et un jour de rappel</b>. Si la personne vous reçoit : trois minutes, deux questions de la fiche secteur, la lettre et la fiche Diagnostic offert.'
+  ],
+  objections: [
+    ['« Envoyez-moi une proposition. »', '« Volontiers. Pour qu’elle soit utile, nous avons besoin de deux précisions. » Puis : « Nous vous l’envoyons mardi et nous vous appelons jeudi à 10 h, cela vous convient ? »'],
+    ['« J’ai déjà quelqu’un. »', '« Très bien, c’est important d’avoir quelqu’un de fiable. Nous ne le remplaçons pas : nous regardons la stratégie et les risques, il gère le quotidien. »'],
+    ['« Je vous connais mal. »', 'Ne cherchez pas à convaincre : proposez le diagnostic offert de 45 minutes, sans risque. Laissez le travail parler.'],
+    ['« Vous êtes seul, et si vous n’êtes pas disponible ? »', '« Vous avez raison de poser la question. Chaque client dispose d’un dossier technique documenté et le contrat prévoit des délais d’intervention écrits : un autre technicien qualifié peut reprendre à tout moment. »']
+  ],
+  regles: [
+    '<b>Aucun prix</b>, jamais, avant le diagnostic. « Nos prestations sont chiffrées sur devis, après un diagnostic offert. »',
+    '<b>Aucune critique</b> de l’existant, surtout devant la direction.',
+    'On dit <b>« nous »</b> : c’est la voix de l’entreprise, à l’écrit comme à l’oral.',
+    'On ne promet rien qui ne soit pas en place.',
+    'On note dans les <b>dix minutes</b> : un rendez-vous oublié est un rendez-vous perdu.'
+  ],
+  questions: [
+    'Comment votre entreprise fonctionnerait-elle si vos ordinateurs étaient inaccessibles pendant trois jours ?',
+    'Qui s’occupe de votre informatique aujourd’hui, et comment cela se passe-t-il ?',
+    'Quand vous avez un problème, combien de temps s’écoule avant qu’il soit réglé ?',
+    'Où sont vos données aujourd’hui, et à quand remonte la dernière fois où vous avez vérifié qu’une sauvegarde se restaure correctement ?',
+    'Combien avez-vous dépensé en informatique l’an dernier, toutes dépenses confondues ?',
+    'Y a-t-il eu un incident ces douze derniers mois ? Que s’est-il passé exactement ?',
+    'Quelle est la donnée dont la perte serait la plus grave pour vous ?',
+    'Qu’est-ce qui vous empêche aujourd’hui de faire ce que vous aimeriez faire avec le numérique ?',
+    'Si nous nous revoyons dans un an et que tout s’est bien passé, qu’est-ce qui aura changé ?',
+    'Qui d’autre que vous doit être associé à cette décision ?'
+  ]
+};
+
+let VIS_ONGLET = 'cibles', VIS_TOURNEE = '', VIS_STATUT = 'a_visiter', VIS_SECTEUR = '';
+
+/* Les listes ne sont pas dans DEFAUT : un tableau partagé entre DEFAUT et D serait modifié par erreur. */
+function cib() { if (!Array.isArray(D.cibles)) D.cibles = []; return D.cibles; }
+function vis() { if (!Array.isArray(D.visites)) D.visites = []; return D.visites; }
+
+const nrm = s => String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’‘]/g, "'").toLowerCase().replace(/\s+/g, ' ').trim();
+const chk = id => !!(document.getElementById(id) || {}).checked;
+
+function selKV(id, lab, v, paires, onchange) {
+  return `<div class="field"><label for="${id}">${esc(lab)}</label><select id="${id}"${onchange ? ` onchange="${onchange}"` : ''}>` +
+    paires.map(o => `<option value="${esc(o[0])}" ${o[0] === (v || '') ? 'selected' : ''}>${esc(o[1])}</option>`).join('') + `</select></div>`;
+}
+function cb(id, lab, on) {
+  return `<label class="cb"><input type="checkbox" id="${id}" ${on ? 'checked' : ''}><span>${esc(lab)}</span></label>`;
+}
+
+/* ───────────────────────── CSV : lecture et écriture ───────────────────────── */
+function csvLire(txt) {
+  txt = String(txt).replace(/^﻿/, '');
+  const prem = txt.split(/\r?\n/)[0] || '';
+  const sep = (prem.match(/;/g) || []).length >= (prem.match(/,/g) || []).length ? ';' : ',';
+  const rows = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < txt.length; i++) {
+    const c = txt[i];
+    if (q) {
+      if (c === '"') { if (txt[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += c;
+    } else if (c === '"' && cur === '') q = true;
+    else if (c === sep) { row.push(cur); cur = ''; }
+    else if (c === '\n' || c === '\r') {
+      if (c === '\r' && txt[i + 1] === '\n') i++;
+      row.push(cur); cur = '';
+      if (row.some(x => x.trim())) rows.push(row);
+      row = [];
+    } else cur += c;
+  }
+  if (cur || row.length) { row.push(cur); if (row.some(x => x.trim())) rows.push(row); }
+  return rows;
+}
+/* Retourne des objets indexés par les en-têtes normalisés. Une ligne qui a trop de colonnes (point-virgule non protégé
+   dans un texte) voit l'excédent réuni dans la colonne « angle d'approche » ou, à défaut, dans la dernière colonne de texte. */
+function csvTable(txt, colonneExces) {
+  const rows = csvLire(txt);
+  if (rows.length < 2) return { tete: [], lignes: [] };
+  const tete = rows[0].map(nrm);
+  const iEx = colonneExces ? tete.indexOf(colonneExces) : -1;
+  const lignes = rows.slice(1, 2001).map(r => {
+    if (r.length > tete.length && iEx >= 0) {
+      const extra = r.length - tete.length;
+      r = r.slice(0, iEx).concat([r.slice(iEx, iEx + extra + 1).map(s => s.trim()).join('; ')], r.slice(iEx + extra + 1));
+    }
+    const o = {}; tete.forEach((h, i) => { o[h] = (r[i] || '').trim(); });
+    return o;
+  });
+  return { tete, lignes };
+}
+function csvCellule(s) {
+  s = String(s == null ? '' : s).replace(/\r?\n/g, ' ');
+  if (/^[=@]|^[+\-](?![0-9 ()])/.test(s)) s = "'" + s;      // neutralise les formules des tableurs
+  return /[;"]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+function csvEcrire(tete, lignes) {
+  return '﻿' + [tete].concat(lignes).map(l => l.map(csvCellule).join(';')).join('\r\n') + '\r\n';
+}
+function dateIso(s) {
+  s = String(s || '').trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const m = s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2}|\d{4})$/);
+  if (!m) return '';
+  const y = m[3].length === 2 ? '20' + m[3] : m[3];
+  return y + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0');
+}
+function lireFichier(inp, fn) {
+  const f = inp.files[0]; if (!f) return;
+  if (f.size > 1000000) { toast('Fichier trop volumineux (1 Mo maximum)'); inp.value = ''; return; }
+  const r = new FileReader();
+  r.onload = () => { try { fn(String(r.result)); } catch (e) { console.warn(e); toast('Fichier illisible'); } };
+  r.readAsText(f, 'utf-8'); inp.value = '';
+}
+
+/* ───────────────────────── Cibles_Terrain.csv ───────────────────────── */
+function cibImporter(inp) {
+  lireFichier(inp, txt => {
+    const t = csvTable(txt, "angle d'approche");
+    if (t.tete.indexOf('etablissement') < 0) { toast('Colonne « Établissement » introuvable : est-ce bien Cibles_Terrain.csv ?'); return; }
+    const colSous = t.tete.find(h => /^sous.?secteur/.test(h)) || '';
+    const connus = new Set(cib().map(c => nrm(c.nom)));
+    let n = 0, d = 0;
+    t.lignes.forEach(l => {
+      const nom = l['etablissement'];
+      if (!nom) return;
+      if (connus.has(nrm(nom))) { d++; return; }
+      connus.add(nrm(nom));
+      let secteur = l['secteur'] || '', sous = colSous ? (l[colSous] || '') : '';
+      if (!colSous) { const m = secteur.split(' - '); if (m.length > 1) { secteur = m[0]; sous = m.slice(1).join(' - '); } }   // ancien format : « Santé - dentaire »
+      cib().push({ id: uid(), tournee: l['tournee'] || '', priorite: l['priorite'] || '', nom, secteur, sousSecteur: sous,
+        repere: l['repere'] || '', angle: l["angle d'approche"] || '', statut: l['statut'] || 'À visiter',
+        dateVisite: dateIso(l['date de visite']), decideur: l['decideur (fonction)'] || '',
+        action: l['prochaine action'] || '', echeance: dateIso(l['echeance']), notes: l['notes'] || '' });
+      n++;
+    });
+    sauver(); VIS_ONGLET = 'cibles'; router();
+    toast(n + ' cible(s) ajoutée(s)' + (d ? ', ' + d + ' déjà présente(s)' : ''));
+  });
+}
+function cibExporter() {
+  const tete = ['Tournée', 'Priorité', 'Établissement', 'Secteur', 'Sous-secteur ou domaine', 'Repère', "Angle d'approche", 'Statut', 'Date de visite',
+    'Décideur (fonction)', 'Prochaine action', 'Échéance', 'Notes'];
+  const derniere = c => vis().filter(v => v.cibleId === c.id || nrm(v.nom) === nrm(c.nom))
+    .sort((a, b) => (b.date + (b.heure || '')).localeCompare(a.date + (a.heure || '')))[0];
+  const lignes = cib().map(c => {
+    const v = derniere(c);
+    return [c.tournee, c.priorite, c.nom, c.secteur, c.sousSecteur, c.repere, c.angle, c.statut || 'À visiter', v ? v.date : c.dateVisite,
+      (v && v.contact) || c.decideur, (v && v.action) || c.action, (v && v.echeance) || c.echeance, (v && v.besoin) || c.notes];
+  });
+  /* visites d'établissements qui ne figurent pas dans la liste des cibles */
+  vis().filter(v => !cib().some(c => c.id === v.cibleId || nrm(c.nom) === nrm(v.nom))).forEach(v =>
+    lignes.push([v.tournee, '', v.nom, v.secteur, v.sousSecteur, '', '', STATUT_CIBLE[v.issue || ''], v.date, v.contact, v.action, v.echeance, v.besoin]));
+  telecharger('Cibles_Terrain_' + auj() + '.csv', csvEcrire(tete, lignes), 'text/csv;charset=utf-8');
+  toast('Export prêt — à copier dans Equipe_Numerique');
+}
+
+/* ───────────────────────── Suivi_Prospects.csv ───────────────────────── */
+const CANAUX = { 'formulaire du site': 'Site web', 'site': 'Site web', 'site web': 'Site web', 'messenger': 'Facebook', 'messagerie facebook': 'Facebook',
+  'email': 'Courriel', 'e-mail': 'Courriel', 'mail': 'Courriel', 'courriel': 'Courriel', 'telephone': 'Appel téléphonique', 'appel': 'Appel téléphonique',
+  'whatsapp': 'WhatsApp', 'facebook': 'Facebook', 'google': 'Google', 'recommandation': 'Recommandation' };
+function origineDepuisCanal(c) {
+  const k = nrm(c);
+  if (!k) return '';
+  const o = ORIGINES.find(x => nrm(x) === k);
+  return o || CANAUX[k] || 'Autre';
+}
+function suiviImporter(inp) {
+  lireFichier(inp, txt => {
+    const t = csvTable(txt, 'notes');
+    if (t.tete.indexOf('entreprise') < 0 && t.tete.indexOf('contact') < 0) { toast('Colonnes « Entreprise » et « Contact » introuvables : est-ce bien Suivi_Prospects.csv ?'); return; }
+    let n = 0, m = 0, d = 0;
+    t.lignes.forEach(l => {
+      const nom = l['entreprise'] || l['contact'];
+      if (!nom) return;
+      const coord = l['telephone ou courriel'] || '';
+      const mail = (coord.match(/[^\s;,\/]+@[^\s;,\/]+/) || [''])[0];
+      const tel = coord.replace(mail, '').replace(/^[\s\/;,]+|[\s\/;,]+$/g, '');
+      const ss = STATUTS_SUIVI.find(s => nrm(s) === nrm(l['statut'])) || 'Nouveau';
+      const champs = { contact: l['contact'] && l['entreprise'] ? l['contact'] : '', tel, mail, besoin: l['besoin'] || '', domaine: l['domaine'] || '',
+        dateContact: dateIso(l['date']), origine: origineDepuisCanal(l['canal']), canal: l['canal'] || '',
+        prochaineAction: l['prochaine action'] || '', dateAction: dateIso(l['echeance']), notes: l['notes'] || '', statutSuivi: ss };
+      const p = D.prospects.find(q => nrm(q.nom) === nrm(nom));
+      if (!p) {
+        D.prospects.push(Object.assign({ id: uid(), nom, secteur: '', etape: SUIVI_VERS_ETAPE[ss] || 'Contacté', montant: 0,
+          proba: ss === 'Perdu' ? 0 : ss === 'Nouveau' ? 10 : 20 }, champs));
+        n++;
+      } else {
+        let modif = false;       // l'application fait foi : on ne remplace jamais une valeur déjà saisie
+        Object.keys(champs).forEach(k => { if (champs[k] && !p[k] && k !== 'statutSuivi') { p[k] = champs[k]; modif = true; } });
+        if (!p.statutSuivi) { p.statutSuivi = ss; modif = true; }
+        if (modif) m++; else d++;
+      }
+    });
+    sauver(); router();
+    toast(n + ' prospect(s) ajouté(s), ' + m + ' complété(s), ' + d + ' inchangé(s)');
+  });
+}
+function suiviExporter() {
+  const tete = ['Date', 'Canal', 'Contact', 'Entreprise', 'Téléphone ou courriel', 'Besoin', 'Domaine', 'Statut', 'Prochaine action', 'Échéance', 'Notes'];
+  const lignes = D.prospects.map(p => [p.dateContact || '', p.canal || p.origine || '', p.contact || '', p.nom || '',
+    [p.tel, p.mail].filter(Boolean).join(' / '), p.besoin || '', p.domaine || '', p.statutSuivi || ETAPE_VERS_SUIVI[p.etape] || 'Nouveau',
+    p.prochaineAction || '', p.dateAction || '', (p.notes || '')]);
+  telecharger('Suivi_Prospects_' + auj() + '.csv', csvEcrire(tete, lignes), 'text/csv;charset=utf-8');
+  toast('Export prêt — à copier dans Equipe_Numerique');
+}
+
+/* ───────────────────────── page « Visites terrain » ───────────────────────── */
+function visOnglet(o) { VIS_ONGLET = o; router(); }
+function visFiltre() { VIS_TOURNEE = val('f_tour'); VIS_STATUT = val('f_stat') || 'a_visiter'; VIS_SECTEUR = val('f_sec'); router(); }
+
+function vVisites(v, a) {
+  a.innerHTML = `<button class="btn sm" onclick="visForm()">+ Nouvelle visite</button>`;
+  const C = cib(), V = vis();
+  const aVisiter = C.filter(c => (c.statut || 'À visiter') === 'À visiter').length;
+  const dia = V.filter(x => x.issue === 'diagnostic' && (x.issueDate || '9999') >= auj()).length;
+  const retard = V.filter(x => x.echeance && x.echeance <= auj() && !x.fait && x.issue !== 'pas_interesse').length;
+  let h = '';
+  if (SEC.mode !== 'code' && (C.length || V.length)) h += `<div class="alert warn"><b>Aucun code d’accès sur cet appareil.</b>
+    Les fiches de visite contiennent des coordonnées et des observations sur l’informatique des prospects.
+    <a href="#parametres">Activez le code d’accès</a> avant de les saisir sur un téléphone.</div>`;
+  h += `<div class="kpis">
+    <div class="kpi"><div class="lab">À visiter</div><div class="val">${aVisiter}</div><div class="sub">${C.length} cible(s) · ${new Set(C.map(c => c.secteur).filter(Boolean)).size} secteur(s)</div></div>
+    <div class="kpi ok"><div class="lab">Visites faites</div><div class="val">${V.length}</div><div class="sub">fiches enregistrées</div></div>
+    <div class="kpi warn"><div class="lab">Diagnostics à venir</div><div class="val">${dia}</div><div class="sub">fixés à une date</div></div>
+    <div class="kpi ${retard ? 'red' : ''}"><div class="lab">Actions échues</div><div class="val">${retard}</div><div class="sub">à traiter aujourd’hui</div></div>
+  </div>`;
+  h += `<div class="onglets">
+    <button class="${VIS_ONGLET === 'cibles' ? 'on' : ''}" onclick="visOnglet('cibles')">À visiter (${aVisiter})</button>
+    <button class="${VIS_ONGLET === 'fiches' ? 'on' : ''}" onclick="visOnglet('fiches')">Fiches (${V.length})</button></div>`;
+  h += VIS_ONGLET === 'fiches' ? visFiches(V) : visCibles(C);
+  v.innerHTML = h;
+}
+
+function visCibles(C) {
+  let h = `<div class="toolbar">
+    <select id="f_tour" onchange="visFiltre()" style="max-width:260px"><option value="">Toutes les tournées</option>` +
+    Object.keys(TOURNEES).map(k => `<option value="${k}" ${VIS_TOURNEE === k ? 'selected' : ''}>${k === 'P' ? 'Prescripteurs' : 'Tournée ' + k} — ${esc(TOURNEES[k])}</option>`).join('') + `</select>
+    <select id="f_sec" onchange="visFiltre()" style="max-width:260px"><option value="">Tous les secteurs</option>` +
+    Array.from(new Set(C.map(c => c.secteur).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'fr')).map(s =>
+      `<option value="${esc(s)}" ${VIS_SECTEUR === s ? 'selected' : ''}>${esc(s)} (${C.filter(c => c.secteur === s).length})</option>`).join('') + `</select>
+    <select id="f_stat" onchange="visFiltre()" style="max-width:190px">
+      <option value="a_visiter" ${VIS_STATUT === 'a_visiter' ? 'selected' : ''}>À visiter</option>
+      <option value="toutes" ${VIS_STATUT === 'toutes' ? 'selected' : ''}>Toutes</option></select>
+    <div class="sp"></div>
+    <button class="btn sec sm" onclick="cibForm()">+ Cible</button>
+    <label class="btn sec sm" for="cibFile">Importer Cibles_Terrain.csv</label>
+    <input type="file" id="cibFile" accept=".csv,text/csv,text/plain" style="display:none" onchange="cibImporter(this)">
+    ${C.length ? `<button class="btn sec sm" onclick="cibExporter()">Exporter</button>` : ''}</div>`;
+  if (!C.length) {
+    return h + vide('Aucune cible. Importez le fichier Cibles_Terrain.csv (dossier Equipe_Numerique) : il est lu sur cet appareil et n’est envoyé nulle part, sauf si vous activez la synchronisation.');
+  }
+  const ordre = { '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, 'P': 6 };
+  const liste = C.filter(c => (!VIS_TOURNEE || c.tournee === VIS_TOURNEE) && (!VIS_SECTEUR || c.secteur === VIS_SECTEUR) &&
+      (VIS_STATUT === 'toutes' || (c.statut || 'À visiter') === 'À visiter'))
+    .sort((x, y) => (ordre[x.tournee] || 9) - (ordre[y.tournee] || 9) || (Number(x.priorite) || 9) - (Number(y.priorite) || 9) || x.nom.localeCompare(y.nom, 'fr'));
+  if (!liste.length) return h + vide('Aucune cible ne correspond à ce filtre.');
+  let cur = null;
+  liste.forEach(c => {
+    if (c.tournee !== cur) {
+      cur = c.tournee;
+      h += `<div class="zone">${cur === 'P' ? 'Prescripteurs et partenaires' : 'Tournée ' + esc(cur || '—') + (TOURNEES[cur] ? ' — ' + esc(TOURNEES[cur]) : '')}</div><div class="lst">`;
+    }
+    const st = c.statut || 'À visiter';
+    h += `<div class="lc"><div class="tx"><div class="tt">${esc(c.nom)}</div>
+      <div class="mt">${esc(c.secteur)}${c.sousSecteur ? ' · ' + esc(c.sousSecteur) : ''}${c.priorite && c.priorite !== '-' ? ' · priorité ' + esc(c.priorite) : ''}</div>
+      ${c.repere ? `<div class="mt">${esc(c.repere)}</div>` : ''}
+      ${c.angle ? `<div class="mt"><i>${esc(c.angle)}</i></div>` : ''}
+      ${c.notes ? `<div class="mt" style="color:var(--warn)">${esc(c.notes)}</div>` : ''}</div>
+      <div class="ac"><span class="pill ${st === 'À visiter' ? 'gris' : st === 'Pas intéressé' ? 'red' : st === 'Diagnostic fixé' ? 'ok' : 'blue'}">${esc(st)}</span>
+      <button class="btn sm" onclick="visForm('', '${c.id}')">Fiche de visite</button>
+      <button class="btn sec sm" onclick="cibForm('${c.id}')">Modifier</button></div></div>`;
+    const suiv = liste[liste.indexOf(c) + 1];
+    if (!suiv || suiv.tournee !== cur) h += `</div>`;
+  });
+  return h;
+}
+
+function cibForm(id) {
+  const c = id ? cib().find(x => x.id === id) : { tournee: VIS_TOURNEE || '1', priorite: '2', statut: 'À visiter' };
+  const secs = Array.from(new Set(cib().map(x => x.secteur).filter(Boolean))).sort((x, y) => x.localeCompare(y, 'fr'));
+  const ssecs = Array.from(new Set(cib().map(x => x.sousSecteur).filter(Boolean))).sort((x, y) => x.localeCompare(y, 'fr'));
+  modal(id ? 'Cible — ' + c.nom : 'Nouvelle cible',
+    champ('k_nom', 'Établissement *', c.nom) +
+    `<div class="grid3">` + selKV('k_tour', 'Tournée', c.tournee, Object.keys(TOURNEES).map(k => [k, k === 'P' ? 'Prescripteurs' : 'Tournée ' + k])) +
+      selKV('k_pri', 'Priorité', c.priorite, [['1', '1 — d’abord'], ['2', '2'], ['3', '3'], ['-', 'Sans priorité']]) +
+      selKV('k_stat', 'Statut', c.statut || 'À visiter', ['À visiter', 'Visité', 'Diagnostic fixé', 'À rappeler', 'À recontacter plus tard', 'Pas intéressé'].map(q => [q, q])) + `</div>` +
+    `<div class="grid2"><div class="field"><label for="k_sec">Secteur</label><input id="k_sec" list="k_secs" value="${esc(c.secteur || '')}" autocomplete="off">
+        <datalist id="k_secs">${secs.map(q => `<option value="${esc(q)}">`).join('')}</datalist></div>
+      <div class="field"><label for="k_ssec">Sous-secteur ou domaine</label><input id="k_ssec" list="k_ssecs" value="${esc(c.sousSecteur || '')}" autocomplete="off">
+        <datalist id="k_ssecs">${ssecs.map(q => `<option value="${esc(q)}">`).join('')}</datalist></div></div>` +
+    champ('k_rep', 'Repère (quartier, rue, point de repère)', c.repere) +
+    champ('k_ang', 'Angle d’approche', c.angle, 'textarea', 'Ce que vous direz en premier : le besoin probable de cet établissement.') +
+    champ('k_not', 'Notes', c.notes, 'textarea'),
+    (id ? `<button class="btn sec" onclick="cibSupprimer('${id}')">Supprimer</button>` : '') +
+    `<button class="btn sec" onclick="fermer()">Annuler</button><button class="btn" onclick="cibSauver('${id || ''}')">Enregistrer</button>`);
+}
+function cibSauver(id) {
+  const nom = val('k_nom');
+  if (!nom) { toast('Le nom de l’établissement est obligatoire'); return; }
+  const dup = cib().find(q => q.id !== id && nrm(q.nom) === nrm(nom));
+  if (dup) { toast('Cette cible existe déjà'); return; }
+  const o = { nom, tournee: val('k_tour'), priorite: val('k_pri'), statut: val('k_stat') || 'À visiter', secteur: val('k_sec'), sousSecteur: val('k_ssec'),
+    repere: val('k_rep'), angle: val('k_ang'), notes: val('k_not') };
+  if (id) Object.assign(cib().find(q => q.id === id), o);
+  else cib().push(Object.assign({ id: uid(), dateVisite: '', decideur: '', action: '', echeance: '' }, o));
+  sauver(); fermer(); router(); toast('Cible enregistrée');
+}
+function cibSupprimer(id) {
+  const c = cib().find(q => q.id === id);
+  if (!c || !confirm('Supprimer la cible « ' + c.nom + ' » ? Les fiches de visite déjà saisies sont conservées.')) return;
+  D.cibles = cib().filter(q => q.id !== id);
+  sauver(); fermer(); router(); toast('Cible supprimée');
+}
+
+function visFiches(V) {
+  let h = `<div class="toolbar"><div class="sp"></div>
+    <button class="btn sec sm" onclick="cibExporter()">Exporter vers Cibles_Terrain.csv</button></div>`;
+  if (!V.length) return h + vide('Aucune fiche de visite. Ouvrez une cible dans l’onglet « À visiter », ou créez une visite.',
+    `<button class="btn" onclick="visForm()">Nouvelle visite</button>`);
+  h += `<div class="lst">` + V.slice().sort((x, y) => (y.date + (y.heure || '')).localeCompare(x.date + (x.heure || ''))).map(x => {
+    const retard = x.echeance && x.echeance < auj() && !x.fait && x.issue !== 'pas_interesse';
+    return `<div class="lc"><div class="tx"><div class="tt">${esc(x.nom)}</div>
+      <div class="mt">${fdate(x.date)}${x.heure ? ' à ' + esc(x.heure) : ''}${x.contact ? ' · ' + esc(x.contact) : ''}${x.tel ? ' · ' + esc(x.tel) : ''}</div>
+      ${x.besoin ? `<div class="mt"><i>${esc(x.besoin.length > 140 ? x.besoin.slice(0, 140) + '…' : x.besoin)}</i></div>` : ''}
+      ${x.action ? `<div class="mt">${x.fait ? '✓ ' : '→ '}${esc(x.action)}${x.echeance ? ' · ' + (retard ? '<b style="color:var(--rouge)">' + fdate(x.echeance) + '</b>' : fdate(x.echeance)) : ''}</div>` : ''}</div>
+      <div class="ac">${x.issue ? `<span class="pill ${ISSUE_PILL[x.issue]}">${esc(ISSUE_LIB[x.issue])}</span>` : `<span class="pill gris">Sans issue</span>`}
+      <button class="btn sec sm" onclick="visForm('${x.id}')">Ouvrir</button></div></div>`;
+  }).join('') + `</div>`;
+  return h;
+}
+
+/* ───────────────────────── la fiche de visite ───────────────────────── */
+function visForm(id, cibleId) {
+  const ex = id ? vis().find(x => x.id === id) : null;
+  const c = cibleId ? cib().find(q => q.id === cibleId) : (ex && ex.cibleId ? cib().find(q => q.id === ex.cibleId) : null);
+  const x = ex || { date: auj(), heure: new Date().toTimeString().slice(0, 5), nom: c ? c.nom : '', secteur: c ? c.secteur : '',
+    sousSecteur: c ? c.sousSecteur : '', tournee: c ? c.tournee : '', cibleId: c ? c.id : '', vu: {}, remis: {}, report: true };
+  const vu = x.vu || {}, rm = x.remis || {};
+  const noms = Array.from(new Set(cib().map(q => q.nom).concat(D.prospects.map(q => q.nom)).filter(Boolean)));
+  const corps =
+    `<details class="mm"><summary>Aide-mémoire : accueil, objections, règles</summary><div class="mb">${memoCompact()}</div></details>
+    <input type="hidden" id="v_cib" value="${esc(x.cibleId || '')}">
+    <div class="st">Établissement</div>
+    <div class="field"><label for="v_nom">Établissement *</label>
+      <input id="v_nom" list="v_noms" value="${esc(x.nom || '')}" autocomplete="off" onchange="visNom()">
+      <datalist id="v_noms">${noms.map(n => `<option value="${esc(n)}">`).join('')}</datalist></div>
+    <div class="grid3">${champ('v_date', 'Date *', x.date, 'date')}${champ('v_heure', 'Heure', x.heure, 'time')}
+      ${selKV('v_tour', 'Tournée', x.tournee, [['', '—']].concat(Object.keys(TOURNEES).map(k => [k, k === 'P' ? 'Prescripteurs' : 'Tournée ' + k])))}</div>
+    <div class="grid2">${champ('v_sec', 'Secteur', x.secteur)}${champ('v_ssec', 'Sous-secteur ou domaine', x.sousSecteur)}</div>
+    <div class="st">Personne rencontrée</div>
+    <div class="grid2">${champ('v_ct', 'Nom et fonction', x.contact)}${selKV('v_role', 'Rôle dans la décision', x.role, ROLES)}</div>
+    <div class="grid2">${champ('v_tel', 'Téléphone / WhatsApp', x.tel, 'tel')}${champ('v_mail', 'Courriel', x.mail, 'email')}</div>
+    ${champ('v_dec', 'Décideur à rencontrer (nom et fonction)', x.decideur)}
+    <div class="st">Ce que j’ai vu</div>
+    ${selKV('v_acc', 'Accueil', vu.accueil, [['', '—'], ['ouvert', 'Accueil ouvert'], ['filtre', 'Accueil filtré']])}
+    <div class="cbs">${cb('v_cam', 'Caméras', vu.cameras)}${cb('v_acs', 'Contrôle d’accès', vu.acces)}${cb('v_srv', 'Serveur / baie visible', vu.serveur)}</div>
+    <div class="grid3">${champ('v_pos', 'Postes (environ)', vu.postes, 'number')}${champ('v_sit', 'Sites', vu.sites, 'number')}${champ('v_pre', 'Prestataire actuel', vu.prestataire)}</div>
+    <div class="st">Ce que j’ai entendu</div>` +
+    QUESTIONS.map(q => champ('v_' + q[0], q[1], x[q[0]], 'textarea', q[2])).join('') +
+    `<div class="st">Ce que j’ai remis</div>
+    <div class="cbs">${cb('v_r1', 'Lettre', rm.lettre)}${cb('v_r2', 'Fiche Diagnostic offert', rm.diag)}${cb('v_r3', 'Dix points', rm.dix)}${cb('v_r4', 'Carte de visite', rm.carte)}${cb('v_r5', 'Plaquette', rm.plaquette)}</div>
+    <div class="st">Issue de la visite</div>
+    ${selKV('v_iss', 'Issue', x.issue, ISSUES, 'visIssue()')}
+    <div class="grid3">${champ('v_isd', 'Date (diagnostic, rappel, nouveau contact)', x.issueDate, 'date')}${champ('v_ish', 'Heure du diagnostic', x.issueHeure, 'time')}
+      ${champ('v_isr', 'Raison, ou quand recontacter', x.issueRaison)}</div>
+    <div class="st">Prochaine action</div>
+    <div class="grid2">${champ('v_act', 'Prochaine action', x.action, 'text', 'Toujours renseignée, sauf si le prospect n’est pas intéressé.')}${champ('v_ech', 'Échéance', x.echeance, 'date')}</div>
+    <div class="cbs">${cb('v_fait', 'Cette action est faite', x.fait)}${cb('v_rep', 'Reporter dans Prospection (crée ou met à jour le prospect)', x.report !== false)}</div>`;
+  modal(id ? 'Visite — ' + x.nom : 'Fiche de visite', corps,
+    (id ? `<button class="btn sec" onclick="visSupprimer('${id}')">Supprimer</button>` : '') +
+    `<button class="btn sec" onclick="fermer()">Annuler</button><button class="btn" onclick="visSauver('${id || ''}')">Enregistrer</button>`, true);
+}
+function visNom() {
+  const n = nrm(val('v_nom')), c = cib().find(q => nrm(q.nom) === n);
+  document.getElementById('v_cib').value = c ? c.id : '';
+  if (c) {
+    if (!val('v_tour')) document.getElementById('v_tour').value = c.tournee || '';
+    if (!val('v_sec')) document.getElementById('v_sec').value = c.secteur || '';
+    if (!val('v_ssec')) document.getElementById('v_ssec').value = c.sousSecteur || '';
+  }
+}
+function visIssue() {
+  const i = val('v_iss'), d = document.getElementById('v_isd'), act = document.getElementById('v_act'), ech = document.getElementById('v_ech');
+  if (i === 'plus_tard' && !d.value) d.value = plusJours(auj(), 90);
+  const defs = { diagnostic: 'Diagnostic informatique offert (45 min)', rappel: 'Rappeler', plus_tard: 'Recontacter' };
+  if (defs[i] && !act.value) act.value = defs[i];
+  if (i && i !== 'pas_interesse' && !ech.value && d.value) ech.value = d.value;
+}
+
+function visSauver(id) {
+  const nom = val('v_nom');
+  if (!nom) { toast('Le nom de l’établissement est obligatoire'); return; }
+  if (!val('v_date')) { toast('La date est obligatoire'); return; }
+  const prec = id ? vis().find(q => q.id === id) : null;
+  const o = {
+    cibleId: val('v_cib'), nom, date: val('v_date'), heure: val('v_heure'), tournee: val('v_tour'), secteur: val('v_sec'), sousSecteur: val('v_ssec'),
+    contact: val('v_ct'), role: val('v_role'), tel: val('v_tel'), mail: val('v_mail'), decideur: val('v_dec'),
+    vu: { accueil: val('v_acc'), cameras: chk('v_cam'), acces: chk('v_acs'), serveur: chk('v_srv'), postes: val('v_pos'), sites: val('v_sit'), prestataire: val('v_pre') },
+    remis: { lettre: chk('v_r1'), diag: chk('v_r2'), dix: chk('v_r3'), carte: chk('v_r4'), plaquette: chk('v_r5') },
+    issue: val('v_iss'), issueDate: val('v_isd'), issueHeure: val('v_ish'), issueRaison: val('v_isr'),
+    action: val('v_act'), echeance: val('v_ech'), fait: chk('v_fait'), report: chk('v_rep'), maj: Date.now()
+  };
+  QUESTIONS.forEach(q => { o[q[0]] = val('v_' + q[0]); });
+  if (o.issue && o.issue !== 'pas_interesse') {
+    if (!o.echeance && o.issueDate) o.echeance = o.issueDate;
+    if (!o.action) o.action = { diagnostic: 'Diagnostic informatique offert (45 min)', rappel: 'Rappeler', plus_tard: 'Recontacter' }[o.issue] || '';
+  }
+  let x;
+  if (prec) { x = Object.assign(prec, o); }
+  else { x = Object.assign({ id: uid(), cree: auj() }, o); vis().push(x); }
+  const cible = x.cibleId ? cib().find(q => q.id === x.cibleId) : null;
+  if (cible) { cible.statut = STATUT_CIBLE[x.issue || '']; cible.dateVisite = x.date; }
+  if (x.report) visVersProspect(x, !!prec);
+  sauver(); fermer(); router(); toast('Fiche enregistrée');
+}
+
+function visVersProspect(x, dejaReporte) {
+  const perdu = x.issue === 'pas_interesse';
+  const ss = ISSUE_VERS_SUIVI[x.issue || ''];
+  const resume = 'Visite du ' + fdate(x.date) + (x.besoin ? ' — ' + x.besoin : '') + (perdu && x.issueRaison ? ' — motif : ' + x.issueRaison : '');
+  let p = (x.prospectId && D.prospects.find(q => q.id === x.prospectId)) || D.prospects.find(q => nrm(q.nom) === nrm(x.nom));
+  if (!p) {
+    p = { id: uid(), nom: x.nom, contact: x.contact, tel: x.tel, mail: x.mail, secteur: x.secteur, sousSecteur: x.sousSecteur, origine: 'Prospection terrain', canal: 'Prospection terrain',
+      dateContact: x.date, besoin: x.besoin, etape: SUIVI_VERS_ETAPE[ss] || 'Contacté', statutSuivi: ss, montant: 0,
+      proba: perdu ? 0 : x.issue === 'diagnostic' ? 20 : 10,
+      prochaineAction: perdu ? '' : x.action, dateAction: perdu ? '' : x.echeance, notes: resume };
+    D.prospects.push(p);
+  } else {
+    if (x.contact) p.contact = x.contact;
+    if (x.tel) p.tel = x.tel;
+    if (x.mail) p.mail = x.mail;
+    if (!p.secteur && x.secteur) p.secteur = x.secteur;
+    if (!p.sousSecteur && x.sousSecteur) p.sousSecteur = x.sousSecteur;
+    if (!p.dateContact) p.dateContact = x.date;
+    if (x.besoin) p.besoin = x.besoin;
+    if (['Identifié', 'Contacté'].includes(p.etape)) {                       // jamais de retour en arrière sur une affaire avancée
+      p.statutSuivi = ss;
+      if (SUIVI_VERS_ETAPE[ss]) { p.etape = SUIVI_VERS_ETAPE[ss]; if (perdu) p.proba = 0; else if (x.issue === 'diagnostic') p.proba = Math.max(N(p.proba), 20); }
+    }
+    if (!perdu && x.action) { p.prochaineAction = x.action; if (x.echeance) p.dateAction = x.echeance; }
+    if (!dejaReporte) p.notes = ((p.notes ? p.notes + '\n' : '') + resume).trim();
+  }
+  x.prospectId = p.id;
+}
+
+function visSupprimer(id) {
+  if (!confirm('Supprimer cette fiche de visite ?')) return;
+  const x = vis().find(q => q.id === id);
+  D.visites = vis().filter(q => q.id !== id);
+  if (x && x.cibleId && !vis().some(q => q.cibleId === x.cibleId)) {
+    const c = cib().find(q => q.id === x.cibleId); if (c) { c.statut = 'À visiter'; c.dateVisite = ''; }
+  }
+  sauver(); fermer(); router(); toast('Fiche supprimée');
+}
+
+/* ───────────────────────── l'aide-mémoire de poche ───────────────────────── */
+function memoCompact() {
+  return `<p class="mp"><b>À l’accueil.</b> ${MEMO.accueil[0]}</p><p class="mp">${MEMO.accueil[1]}</p>` +
+    MEMO.objections.map(o => `<p class="mp"><b>${o[0]}</b><br>${o[1]}</p>`).join('') +
+    `<ul class="regles">${MEMO.regles.map(r => `<li>${r}</li>`).join('')}</ul>`;
+}
+function vMemo(v, a) {
+  a.innerHTML = `<button class="btn sm" onclick="visForm()">+ Nouvelle visite</button>`;
+  v.innerHTML = `
+    <div class="pitch"><div class="pt">Votre présentation en 30 secondes</div>${MEMO.pitch.map(t => `<p>${t}</p>`).join('')}</div>
+    <div class="card"><h3>À l’accueil : deux minutes</h3><div class="body">${MEMO.accueil.map(t => `<p class="mp">${t}</p>`).join('')}</div></div>
+    <div class="card"><h3>Quatre objections, quatre réponses</h3><div class="body">` +
+      MEMO.objections.map(o => `<details class="mm"><summary>${o[0]}</summary><div class="mb">${o[1]}</div></details>`).join('') + `</div></div>
+    <div class="card"><h3>Les cinq règles du terrain</h3><div class="body"><ul class="regles">${MEMO.regles.map(r => `<li>${r}</li>`).join('')}</ul></div></div>
+    <div class="card"><h3>Les dix questions à poser</h3><div class="body"><p class="mp" style="color:var(--gris)">Dans cet ordre. Notez les réponses sur la fiche de visite.</p>
+      <ol class="regles">${MEMO.questions.map(q => `<li>${q}</li>`).join('')}</ol></div></div>
+    <div class="mini" style="margin:6px 2px 0">Usage interne : ne jamais montrer cet écran à un prospect. Aucun prix avant le diagnostic.</div>`;
+}
+
+/* ═══════════════════ PARAMÈTRES ═══════════════════ */
+function vParametres(v, a) {
+  const e = D.entreprise;
+  v.innerHTML = `
+  <div class="card"><h3>Identité de l’entreprise</h3><div class="body">
+    ${/695980712|697715518/.test(JSON.stringify(D.entreprise).replace(/\D/g, '')) ? `<div class="alert red"><b>Ancien numéro de téléphone détecté.</b> Remplacez-le par le +237 674 496 342 (champs téléphone et Mobile Money) : il figurerait sur vos devis et vos factures.</div>` : ''}
+    <div class="alert ${e.rccm && e.niu ? 'ok' : 'warn'}">
+      ${e.rccm && e.niu ? 'Vos mentions légales sont complètes : vos factures sont exploitables par vos clients.'
+        : '<b>Le RCCM et le NIU sont obligatoires sur vos devis et factures.</b> Sans eux, votre client ne peut pas passer la dépense en comptabilité, et il ne vous le dira pas toujours.'}
+    </div>
+    <div class="grid2">${champ('e_nom', 'Nom commercial', e.nom)}${champ('e_forme', 'Forme juridique', e.forme)}</div>
+    ${champ('e_prop', 'Gérant', e.proprio, 'text', 'Le nom porté sur les documents contractuels de la société.')}
+    <div class="grid2">${champ('e_rccm', 'RCCM', e.rccm)}${champ('e_niu', 'NIU', e.niu)}</div>
+    ${champ('e_ad', 'Adresse', e.adresse)}
+    <div class="grid2">${champ('e_tel', 'Téléphone', e.tel, 'tel')}${champ('e_em', 'Courriel', e.email, 'email')}</div>
+    <div class="grid2">${champ('e_bq', 'Banque', e.banque)}${champ('e_rib', 'RIB / IBAN', e.rib)}</div>
+    <div class="grid2">${champ('e_momo', 'Mobile Money', e.momo)}${champ('e_reg', 'Régime fiscal', e.regime, 'select', '', ['Réel', 'IGS'])}</div>
+    ${champ('e_tva', 'Mention fiscale portée sur les factures', e.mentionTva)}
+    <div class="grid3">${champ('e_val', 'Validité des devis (jours)', e.validiteDevis, 'number')}
+      ${champ('e_del', 'Délai de paiement (jours)', e.delaiPaiement, 'number')}
+      ${champ('e_pen', 'Pénalités de retard', e.penalite)}</div>
+    <div class="grid2">${champ('e_seuil', 'Seuil de rentabilité mensuel', e.seuilMensuel, 'number', 'Repris du prévisionnel. Sert au tableau de bord.')}
+      ${champ('e_tauxtva', 'Taux de TVA (%)', e.tauxTva, 'number', 'Régime du réel : 19,25 % (17,5 % plus 10 % de centimes communaux). À confirmer auprès de votre centre des impôts.')}
+      ${champ('e_acis', 'Acompte mensuel d’impôt société (%)', e.tauxAcompteIs, 'number', '2,2 % du chiffre d’affaires mensuel, CAC compris, dû le 15 du mois suivant.')}</div>
+    <button class="btn" onclick="saveEntreprise()">Enregistrer</button>
+  </div></div>
+
+  <div class="card"><h3>Sauvegarde des données</h3><div class="body">
+    <div class="alert warn"><b>Vos données sont stockées uniquement sur cet appareil.</b>
+      Si vous videz les données du navigateur, si le téléphone est perdu ou réinitialisé, tout disparaît.
+      Exportez une sauvegarde chaque vendredi et envoyez-la-vous par courriel ou WhatsApp : cela prend dix secondes.</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn" onclick="exporter()">Exporter la sauvegarde</button>
+      <button class="btn sec" onclick="document.getElementById('imp').click()">Importer une sauvegarde</button>
+      <input type="file" id="imp" accept=".json" style="display:none" onchange="importer(this)">
+      <button class="btn sec" onclick="exporterCsv()">Exporter les factures (CSV)</button>
+      <div class="sp"></div>
+      <button class="btn sec" onclick="if(confirm('Effacer TOUTES les données ? Cette action est irréversible.')){localStorage.removeItem(KEY);location.reload()}">Tout effacer</button>
+    </div>
+    <div class="mini" style="margin-top:14px">
+      ${D.clients.length} client(s) · ${D.devis.length} devis · ${D.factures.length} facture(s) ·
+      ${D.contrats.length} contrat(s) · ${D.interventions.length} intervention(s) · ${D.prospects.length} prospect(s) · ${vis().length} visite(s) · ${cib().length} cible(s)
+    </div>
+  </div></div>
+
+  <div class="card"><h3>Sécurité de cet appareil</h3><div class="body">
+    ${SEC.mode === 'code' ? `
+      <div class="alert ok"><b>Code d'accès activé.</b> Vos données sont chiffrées sur cet appareil (AES-256).
+        Sans le code, elles sont illisibles, y compris pour quelqu'un qui aurait l'appareil en main.</div>
+      <div class="grid2" style="margin-bottom:12px">
+        <div><div class="mini">Verrouillage automatique</div>
+          <b>${SEC.autoLock ? SEC.autoLock + ' minutes d\'inactivité' : 'désactivé'}</b></div>
+        <div><div class="mini">Algorithme</div><b>PBKDF2 ${fm(SEC.iter)} tours · AES-GCM 256</b></div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn sec" onclick="verrouillerMaintenant()">Verrouiller maintenant</button>
+        <button class="btn sec" onclick="changerCode()">Changer le code</button>
+        <div class="sp"></div>
+        <button class="btn sec" onclick="desactiverCode()">Désactiver</button>
+      </div>`
+    : `
+      <div class="alert warn"><b>Aucun code d'accès.</b> N'importe qui ayant accès à cet appareil peut ouvrir
+        l'application et lire vos clients, vos prix et vos factures. Activez un code : vos données seront
+        chiffrées sur l'appareil.</div>
+      <button class="btn" onclick="activerCode()">Activer un code d'accès</button>`}
+    <div class="alert info" style="margin-top:14px"><b>Ce que ce code protège, et ce qu'il ne protège pas.</b>
+      Il protège vos données <i>sur cet appareil</i> : téléphone perdu, ordinateur partagé, regard indiscret.
+      Il ne protège pas le code de l'application lui-même, qui est public dès lors qu'il est hébergé sur Internet —
+      c'est normal, et sans conséquence : la valeur est dans les données, pas dans le programme.</div>
+  </div></div>
+
+  <div class="card"><h3>Synchronisation entre vos appareils</h3><div class="body">
+    ${FB && FB.user ? `
+      <div class="alert ok"><b>Connecté :</b> ${esc(FB.user.email || '')}.
+        Vos données sont partagées entre tous les appareils connectés avec ce compte.
+        Dernière synchronisation : ${etatSync().pousse ? new Date(etatSync().pousse).toLocaleString('fr-FR') : '—'}.</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" onclick="nuageSynchroniser()">Synchroniser maintenant</button>
+        <div class="sp"></div>
+        <button class="btn sec" onclick="nuageDeconnexion()">Se déconnecter</button>
+      </div>`
+    : `
+      <div class="alert ${fbConfig() ? 'warn' : 'info'}">
+        ${fbConfig() ? '<b>Configuration enregistrée, mais vous n\'êtes pas connecté.</b> Saisissez vos identifiants ci-dessous.'
+                     : '<b>Synchronisation non configurée.</b> Sans elle, chaque appareil garde ses propres données. Le guide 16 explique comment créer le projet en quinze minutes, gratuitement.'}
+      </div>
+      ${fbConfig() ? `
+      <div class="grid2">${champ('s_em', 'Adresse électronique du compte', '', 'email')}
+        ${champ('s_mp', 'Mot de passe', '', 'password')}</div>
+      <button class="btn" onclick="connecterNuage()">Se connecter</button>` : ''}
+      <details style="margin-top:16px"><summary style="cursor:pointer;font-size:13.5px;color:var(--indigo);font-weight:600">
+        Configuration du projet Firebase</summary>
+        <div style="margin-top:12px">
+          ${champ('f_api', 'apiKey', (fbConfig() || {}).apiKey || '')}
+          <div class="grid2">${champ('f_dom', 'authDomain', (fbConfig() || {}).authDomain || '')}
+            ${champ('f_prj', 'projectId', (fbConfig() || {}).projectId || '')}</div>
+          <div class="grid2">${champ('f_bkt', 'storageBucket', (fbConfig() || {}).storageBucket || '')}
+            ${champ('f_snd', 'messagingSenderId', (fbConfig() || {}).messagingSenderId || '')}</div>
+          ${champ('f_app', 'appId', (fbConfig() || {}).appId || '')}
+          <button class="btn sec" onclick="enregistrerFirebase()">Enregistrer la configuration</button>
+          <div class="mini" style="margin-top:10px">Ces valeurs se copient depuis la console Firebase,
+            Paramètres du projet → Vos applications → Configuration du SDK. Elles ne sont pas secrètes :
+            la protection vient des règles de sécurité, pas de ces clés.</div>
+        </div>
+      </details>`}
+    <div class="alert info" style="margin-top:14px"><b>Comment cela fonctionne.</b> L'application continue de
+      travailler hors ligne : tout est écrit d'abord sur l'appareil, puis envoyé dès que le réseau revient.
+      Si deux appareils ont été modifiés séparément, l'application vous prévient et télécharge automatiquement
+      une sauvegarde avant tout remplacement.</div>
+  </div></div>
+
+  <div class="card"><h3>Installer l’application sur votre téléphone</h3><div class="body">
+    <p style="font-size:14px;margin-bottom:12px">Une fois l'application hébergée en ligne (voir le guide 16),
+      installez-la comme une application normale :</p>
+    <p style="font-size:13.5px;color:var(--gris);line-height:1.9">
+      <b style="color:var(--encre)">Android (Chrome)</b> — ouvrez l'adresse, puis menu ⋮ → « Installer l'application ».<br>
+      <b style="color:var(--encre)">iPhone (Safari)</b> — bouton Partager → « Sur l'écran d'accueil ».<br>
+      <b style="color:var(--encre)">Ordinateur (Chrome ou Edge)</b> — icône d'installation dans la barre d'adresse.</p>
+  </div></div>`;
+}
+function enregistrerFirebase() {
+  const cfg = { apiKey: val('f_api'), authDomain: val('f_dom'), projectId: val('f_prj'),
+    storageBucket: val('f_bkt'), messagingSenderId: val('f_snd'), appId: val('f_app') };
+  if (!cfg.apiKey || !cfg.projectId) { toast('apiKey et projectId sont indispensables'); return; }
+  fbConfigEcrire(cfg); FB = null; router();
+  toast('Configuration enregistrée — connectez-vous maintenant');
+}
+async function connecterNuage() {
+  const em = val('s_em'), mp = val('s_mp');
+  if (!em || !mp) { toast('Renseignez l\'adresse et le mot de passe'); return; }
+  badgeSync('connexion');
+  try { await nuageConnexion(em, mp); toast('Connecté — synchronisation active'); }
+  catch (e) {
+    console.warn(e); badgeSync('erreur');
+    const c = (e && e.code) || '';
+    toast(c.indexOf('invalid-cred') >= 0 || c.indexOf('wrong-password') >= 0 || c.indexOf('user-not-found') >= 0
+      ? 'Identifiants refusés' : 'Connexion impossible : ' + (c || 'vérifiez la configuration'));
+  }
+}
+function saveEntreprise() {
+  Object.assign(D.entreprise, {
+    nom: val('e_nom'), forme: val('e_forme'), proprio: val('e_prop'), rccm: val('e_rccm'), niu: val('e_niu'),
+    adresse: val('e_ad'), tel: val('e_tel'), email: val('e_em'), banque: val('e_bq'), rib: val('e_rib'),
+    momo: val('e_momo'), regime: val('e_reg'), mentionTva: val('e_tva'),
+    validiteDevis: nval('e_val'), delaiPaiement: nval('e_del'), penalite: val('e_pen'),
+    seuilMensuel: nval('e_seuil'), tauxTva: nval('e_tauxtva'), tauxAcompteIs: nval('e_acis')
+  });
+  sauver(); router(); toast('Paramètres enregistrés');
+}
+function telecharger(nom, contenu, type) {
+  const b = new Blob([contenu], { type: type || 'application/json' });
+  const u = URL.createObjectURL(b), a = document.createElement('a');
+  a.href = u; a.download = nom; a.click(); setTimeout(() => URL.revokeObjectURL(u), 4000);
+}
+function exporter() {
+  telecharger('DB-sauvegarde-' + auj() + '.json', JSON.stringify(D, null, 1));
+  toast('Sauvegarde exportée — envoyez-la-vous par WhatsApp');
+}
+function importer(inp) {
+  const f = inp.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const d = JSON.parse(r.result);
+      if (!d.clients) throw 0;
+      if (!confirm('Remplacer toutes les données actuelles par cette sauvegarde ?')) return;
+      D = Object.assign({}, DEFAUT, d, { entreprise: Object.assign({}, DEFAUT.entreprise, d.entreprise || {}) });
+      sauver(); router(); toast('Sauvegarde restaurée');
+    } catch (e) { toast('Fichier illisible'); }
+  };
+  r.readAsText(f); inp.value = '';
+}
+function exporterCsv() {
+  const l = [['Numero', 'Date', 'Echeance', 'Client', 'NIU client', 'Objet', 'Montant HT', 'TVA', 'Montant TTC', 'Encaisse', 'Reste', 'Statut']];
+  D.factures.forEach(f => {
+    const c = client(f.clientId) || {};
+    l.push([f.num, f.date, f.echeance, c.nom || '', c.niu || '', (f.objet || '').replace(/[\r\n;]/g, ' '),
+      totaux(f).net, totaux(f).tva, totaux(f).ttc, N(f.acompte) + paye(f), reste(f), statutFacture(f).t]);
+  });
+  telecharger('DB-factures-' + auj() + '.csv', '﻿' + l.map(r => r.join(';')).join('\n'), 'text/csv');
+  toast('Export CSV pour votre comptable');
+}
+
+/* ═══════════════════ IMPRESSION DEVIS / FACTURE ═══════════════════ */
+const MARQUE = `<svg viewBox="0 0 188 188"><rect width="188" height="188" rx="44" fill="#3E4CB8"/>
+  <g transform="translate(50,34) scale(1.06)"><path d="M8 4 L8 92 L30 70 L46 108 L64 100 L48 63 L76 60 Z"
+  fill="#fff" stroke="#fff" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/></g></svg>`;
+
+function imprimer(type, id) {
+  const doc = (type === 'devis' ? D.devis : D.factures).find(x => x.id === id);
+  if (!doc) return;
+  const e = D.entreprise, c = client(doc.clientId) || {};
+  const t = totaux(doc);
+  const encaisse = type === 'facture' ? N(doc.acompte) + paye(doc) : 0;
+  const du = type === 'facture' ? t.ttc - encaisse : t.ttc;
+  const titre = type === 'devis' ? 'DEVIS' : 'FACTURE';
+
+  const meta = type === 'devis'
+    ? [['N°', doc.num], ['Date', fdate(doc.date)],
+       ['Validité', N(doc.validite || 15) + ' jours, soit jusqu’au ' + fdate(plusJours(doc.date, N(doc.validite || 15)))]]
+    : [['N°', doc.num], ['Date', fdate(doc.date)], ['Échéance', fdate(doc.echeance)]]
+      .concat(doc.devisId ? [['Référence', (D.devis.find(x => x.id === doc.devisId) || {}).num || '']] : []);
+
+  let lignesTot = `<tr class="tot"><td colspan="4" style="text-align:right">Total hors taxes</td><td class="num">${fm(t.ht)}</td></tr>`;
+  if (t.rem) lignesTot += `<tr class="tot"><td colspan="4" style="text-align:right">Remise ${N(doc.remise)} %</td><td class="num">− ${fm(t.rem)}</td></tr>`;
+  lignesTot += `<tr class="tot"><td colspan="4" style="text-align:right">${esc(e.mentionTva)}</td><td class="num">${fm(t.tva)}</td></tr>`;
+  if (type === 'facture' && encaisse) {
+    lignesTot += `<tr class="tot"><td colspan="4" style="text-align:right">Total TTC</td><td class="num">${fm(t.ttc)}</td></tr>`;
+    lignesTot += `<tr class="tot"><td colspan="4" style="text-align:right">Déjà réglé</td><td class="num">− ${fm(encaisse)}</td></tr>`;
+  }
+  lignesTot += `<tr class="tot big"><td colspan="4" style="text-align:right">NET À PAYER (FCFA)</td><td class="num">${fm(du)}</td></tr>`;
+
+  const excl = (doc.exclusions || '').trim();
+
+  document.getElementById('print').innerHTML = `<div class="doc">
+    <div class="hd">
+      <div class="lg">${MARQUE}<div><b>D<i>&amp;</i>B</b><span>INFORMATIQUE</span></div></div>
+      <div class="rr"><div class="t">${titre}</div>` +
+        meta.map(([k, v]) => `<div>${esc(k)} : <b>${esc(v)}</b></div>`).join('') + `</div>
+    </div>
+
+    <div class="parties">
+      <div class="em"><div class="lb">ÉMETTEUR</div>
+        <b>${esc(e.nom)}</b><br>${esc(e.forme)}${e.proprio ? '<br>' + esc(e.proprio) : ''}<br>
+        ${esc(e.adresse)}<br>RCCM : ${esc(e.rccm || '—')}<br>NIU : ${esc(e.niu || '—')}<br>
+        ${esc(e.tel)} · ${esc(e.email)}</div>
+      <div class="cl"><div class="lb">${type === 'devis' ? 'CLIENT' : 'FACTURÉ À'}</div>
+        <b>${esc(c.nom || '—')}</b><br>${esc(c.adresse || '')}<br>
+        NIU : ${esc(c.niu || '—')}<br>${c.contact ? 'À l’attention de : ' + esc(c.contact) : ''}
+        ${c.fonction ? ', ' + esc(c.fonction) : ''}<br>${esc(c.tel || '')}</div>
+    </div>
+
+    ${doc.objet ? `<h4>OBJET</h4><div style="font-size:10.5px;line-height:1.6">${esc(doc.objet).replace(/\n/g, '<br>')}</div>` : ''}
+
+    <h4>DÉTAIL DE LA PRESTATION</h4>
+    <table><thead><tr><th style="width:7%">Réf.</th><th style="width:48%">Désignation</th>
+      <th style="width:9%" class="num">Qté</th><th style="width:18%" class="num">P.U. HT</th>
+      <th style="width:18%" class="num">Montant HT</th></tr></thead><tbody>` +
+      (doc.lignes || []).map((l, i) => `<tr><td>${String(i + 1).padStart(2, '0')}</td>
+        <td>${esc(l.des)}</td><td class="num">${N(l.qte)}</td>
+        <td class="num">${fm(l.pu)}</td><td class="num">${fm(N(l.qte) * N(l.pu))}</td></tr>`).join('') +
+      lignesTot + `</tbody></table>
+
+    <div style="font-size:10.5px;margin-top:4mm">Arrêté${type === 'facture' ? 'e la présente facture' : ' le présent devis'}
+      à la somme de : <b>${esc(enLettres(du))} francs CFA</b>.</div>
+
+    ${excl ? `<h4>CE QUI N’EST PAS INCLUS</h4><div style="font-size:10px;line-height:1.7">` +
+      excl.split('\n').filter(Boolean).map(x => '· ' + esc(x)).join('<br>') +
+      `<br>· Toute demande hors du présent périmètre fera l’objet d’un avenant écrit et chiffré, accepté avant exécution.</div>` : ''}
+
+    <h4>${type === 'devis' ? 'MODALITÉS' : 'RÈGLEMENT'}</h4>
+    <div class="mentions">
+      ${type === 'devis'
+        ? `<b>Acompte :</b> 50 % à la commande, solde à la réception contre procès-verbal signé. Les délais de réalisation courent à compter de l’encaissement de l’acompte, et non de la signature.<br>`
+        : `<b>Échéance :</b> ${fdate(doc.echeance)}. Merci de rappeler la référence <b>${esc(doc.num)}</b> sur le virement.<br>`}
+      <b>Virement :</b> ${esc(e.banque || '[banque]')} — ${esc(e.rib || '[RIB]')}<br>
+      <b>Mobile Money :</b> ${esc(e.momo || '—')}<br>
+      <b>Pénalités de retard :</b> ${esc(e.penalite)}, exigibles sans mise en demeure préalable.<br>
+      <b>Réserve de propriété :</b> le matériel demeure la propriété de ${esc(e.nom)} jusqu’au paiement intégral.<br>
+      <b>Garantie :</b> 12 mois sur la main-d’œuvre, garantie constructeur sur le matériel.<br>
+      Les conditions générales de vente jointes font partie intégrante du présent document.
+    </div>
+
+    ${type === 'devis' ? `<div class="sign">
+      <div><b>Pour ${esc(e.nom)}</b>${esc(e.proprio)}<br>Date : ${fdate(doc.date)}<br>Signature et cachet :</div>
+      <div><b>BON POUR ACCORD — Le client</b>Nom et fonction : ______________________<br>
+        Date : ______________________<br>Mention manuscrite « Bon pour accord », signature et cachet :</div>
+    </div>` : `<div style="margin-top:8mm;text-align:right;font-size:10px">
+      <b style="color:var(--encre)">${esc(e.nom)} — ${esc(e.proprio)}</b><br>Cachet de l’entreprise :</div>`}
+
+    <div class="pied">${esc(e.nom)} · ${esc(e.forme)} · ${esc(e.adresse)} · ${esc(e.tel)} · ${esc(e.email)}<br>
+      RCCM : ${esc(e.rccm || '[à compléter]')} · NIU : ${esc(e.niu || '[à compléter]')} · Régime ${esc(e.regime)}</div>
+  </div>`;
+
+  if (!e.rccm || !e.niu) toast('Attention : RCCM ou NIU manquant sur ce document');
+  setTimeout(() => window.print(), 120);
+}
+
+/* ═══════════════════ DÉMARRAGE ═══════════════════ */
+function demo() {
+  if (D.clients.length || D.factures.length) { toast('Des données existent déjà'); return; }
+  const c1 = { id: uid(), nom: 'CLINIQUE LA COLOMBE', secteur: 'Santé privée', niu: 'M0119XXXXXXXX',
+    contact: 'Dr Ateba', fonction: 'Directeur', tel: '+237 6XX XX XX XX', origine: 'Recommandation',
+    adresse: 'Rue Ceper, Yaoundé', cree: auj() };
+  const c2 = { id: uid(), nom: 'GROUPE SCOLAIRE LES PALMIERS', secteur: 'Éducation privée', niu: 'M0208XXXXXXXX',
+    contact: 'Mme Ngo Bell', fonction: 'Fondatrice', tel: '+237 6XX XX XX XX', origine: 'WhatsApp',
+    adresse: 'Mendong, Yaoundé', cree: auj() };
+  D.clients.push(c1, c2);
+  const d1 = { id: uid(), num: nextNum('DEV', D.devis), date: plusJours(auj(), -40), validite: 15, statut: 'Accepté',
+    clientId: c1.id, objet: 'Sécurisation du système d’information, suite à l’audit du mois dernier.',
+    lignes: [{ des: 'Solution de sauvegarde locale et cloud, règle 3-2-1, test de restauration documenté', qte: 1, pu: 850000 },
+             { des: 'Mise en conformité des postes : antivirus centralisé, chiffrement, politique de mots de passe', qte: 18, pu: 18000 },
+             { des: 'Session de sensibilisation à la cybersécurité, une demi-journée', qte: 1, pu: 300000 }],
+    remise: 10, proba: 100, exclusions: 'Le remplacement du serveur principal, qui fera l’objet d’un devis distinct.' };
+  D.devis.push(d1);
+  const f1 = { id: uid(), num: nextNum('FAC', D.factures), date: plusJours(auj(), -35),
+    echeance: plusJours(auj(), -5), clientId: c1.id, devisId: d1.id, objet: d1.objet,
+    lignes: d1.lignes, remise: 10, acompte: 700000, paiements: [] };
+  D.factures.push(f1);
+  D.contrats.push({ id: uid(), num: nextNum('CTR', D.contrats), clientId: c1.id, formule: 'Sérénité Business',
+    montantMensuel: 240000, dateDebut: plusJours(auj(), -30), duree: 12, statut: 'Actif', options: [],
+    notes: '18 postes, 1 serveur, 1 site.' });
+  D.interventions.push({ id: uid(), date: plusJours(auj(), -6), clientId: c1.id, gravite: 'Majeur', duree: 3,
+    facturable: false, description: 'Serveur de fichiers inaccessible. Cause : disque défaillant dans la grappe. Disque remplacé, grappe reconstruite, sauvegarde vérifiée.' });
+  D.prospects.push({ id: uid(), nom: 'CABINET DENTAIRE SOURIRE', contact: 'Dr Fotso', tel: '+237 6XX XX XX XX',
+    secteur: 'Santé privée', origine: 'Recommandation', etape: 'RDV tenu', montant: 1200000, proba: 50,
+    prochaineAction: 'Envoyer la proposition d’audit', dateAction: plusJours(auj(), 3),
+    notes: 'Recommandé par la Clinique La Colombe. Deux fauteuils, six postes.' });
+  D.prospects.push({ id: uid(), nom: 'ETS TCHOUMI DISTRIBUTION', contact: 'M. Tchoumi', tel: '+237 6XX XX XX XX',
+    secteur: 'Distribution', origine: 'LinkedIn', etape: 'Contacté', montant: 2500000, proba: 20,
+    prochaineAction: 'Rappeler pour caler un rendez-vous', dateAction: plusJours(auj(), 1), notes: '' });
+  sauver(); router(); toast('Jeu de démonstration chargé — effacez-le dans Paramètres quand vous démarrez pour de vrai');
+}
+
+window.addEventListener('hashchange', router);
+window.addEventListener('DOMContentLoaded', () => { demarrer(); });
+
+/* Le service worker n'est enregistré que s'il existe un vrai fichier sw.js à côté de la page
+   (cas de l'hébergement GitHub Pages). Un worker créé depuis une URL blob: est refusé par les
+   navigateurs : c'est pourquoi on passe par un fichier. En ouverture locale, on ne fait rien. */
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
+</script>
+</body>
+</html>

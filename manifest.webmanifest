@@ -1,0 +1,21 @@
+{
+  "name": "D&B Informatique — Gestion",
+  "short_name": "D&B Gestion",
+  "description": "Clients, devis, factures, relances, contrats, prospection et visites terrain de D&B Informatique.",
+  "lang": "fr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#21255C",
+  "theme_color": "#21255C",
+  "shortcuts": [
+    { "name": "Visites terrain", "short_name": "Visites", "url": "./index.html#visites" },
+    { "name": "Prospection", "short_name": "Prospects", "url": "./index.html#pipeline" }
+  ],
+  "icons": [
+    { "src": "icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,42 @@
+rules_version = '2';
+
+/* ══════════════════════════════════════════════════════════════════════
+   D&B INFORMATIQUE — règles de sécurité Cloud Firestore
+
+   Principe : chaque utilisateur authentifié ne peut lire et écrire QUE
+   le document portant son propre identifiant. Personne d'autre — même
+   connecté au même projet — ne peut y accéder. Ces règles sont appliquées
+   par le serveur : elles ne peuvent pas être contournées depuis le
+   navigateur, contrairement à tout contrôle écrit dans l'application.
+
+   À coller dans : console Firebase → Firestore Database → Règles → Publier
+   ══════════════════════════════════════════════════════════════════════ */
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /entreprises/{uid} {
+
+      // Lecture : uniquement le propriétaire du document.
+      allow read: if request.auth != null && request.auth.uid == uid;
+
+      // Écriture : le propriétaire, et uniquement avec la forme attendue.
+      allow create, update: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['donnees','horloge','appareil','nomAppareil','maj'])
+        && request.resource.data.donnees is string
+        && request.resource.data.donnees.size() < 950000
+        && request.resource.data.horloge is number
+        && request.resource.data.appareil is string
+        && request.resource.data.appareil.size() < 64;
+
+      // Suppression interdite : on n'efface jamais ses données par accident.
+      allow delete: if false;
+    }
+
+    // Tout le reste est refusé par défaut.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
