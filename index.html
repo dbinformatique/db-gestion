@@ -1784,7 +1784,8 @@ function cb(id, lab, on) {
 function csvLire(txt) {
   txt = String(txt).replace(/^﻿/, '');
   const prem = txt.split(/\r?\n/)[0] || '';
-  const sep = (prem.match(/;/g) || []).length >= (prem.match(/,/g) || []).length ? ';' : ',';
+  const nb = c => prem.split(c).length - 1;            // « Texte Unicode » d'Excel sépare par des tabulations
+  const sep = nb('\t') > Math.max(nb(';'), nb(',')) ? '\t' : nb(';') >= nb(',') ? ';' : ',';
   const rows = []; let row = [], cur = '', q = false;
   for (let i = 0; i < txt.length; i++) {
     const c = txt[i];
@@ -1806,7 +1807,7 @@ function csvLire(txt) {
    dans un texte) voit l'excédent réuni dans la colonne « angle d'approche » ou, à défaut, dans la dernière colonne de texte. */
 function csvTable(txt, colonneExces) {
   const rows = csvLire(txt);
-  if (rows.length < 2) return { tete: [], lignes: [] };
+  if (!rows.length) return { tete: [], lignes: [] };
   const tete = rows[0].map(nrm);
   const iEx = colonneExces ? tete.indexOf(colonneExces) : -1;
   const lignes = rows.slice(1, 2001).map(r => {
@@ -1839,8 +1840,15 @@ function lireFichier(inp, fn) {
   const f = inp.files[0]; if (!f) return;
   if (f.size > 1000000) { toast('Fichier trop volumineux (1 Mo maximum)'); inp.value = ''; return; }
   const r = new FileReader();
-  r.onload = () => { try { fn(String(r.result)); } catch (e) { console.warn(e); toast('Fichier illisible'); } };
-  r.readAsText(f, 'utf-8'); inp.value = '';
+  r.onload = () => { try { fn(decoderTexte(new Uint8Array(r.result))); } catch (e) { console.warn(e); toast('Fichier illisible'); } };
+  r.readAsArrayBuffer(f); inp.value = '';
+}
+/* Excel enregistre selon le cas en UTF-8, en UTF-16 (« Texte Unicode ») ou en Windows-1252 (CSV « point-virgule »). */
+function decoderTexte(o) {
+  if (o[0] === 0xFF && o[1] === 0xFE) return new TextDecoder('utf-16le').decode(o);
+  if (o[0] === 0xFE && o[1] === 0xFF) return new TextDecoder('utf-16be').decode(o);
+  try { return new TextDecoder('utf-8', { fatal: true }).decode(o); }
+  catch (e) { return new TextDecoder('windows-1252').decode(o); }
 }
 
 /* ───────────────────────── Cibles_Terrain.csv ───────────────────────── */
@@ -1848,6 +1856,7 @@ function cibImporter(inp) {
   lireFichier(inp, txt => {
     const t = csvTable(txt, "angle d'approche");
     if (t.tete.indexOf('etablissement') < 0) { toast('Colonne « Établissement » introuvable : est-ce bien Cibles_Terrain.csv ?'); return; }
+    if (!t.lignes.length) { toast('Aucune cible dans ce fichier : il ne contient que la ligne des titres.'); return; }
     const colSous = t.tete.find(h => /^sous.?secteur/.test(h)) || '';
     const connus = new Set(cib().map(c => nrm(c.nom)));
     let n = 0, d = 0;
@@ -1899,6 +1908,7 @@ function suiviImporter(inp) {
   lireFichier(inp, txt => {
     const t = csvTable(txt, 'notes');
     if (t.tete.indexOf('entreprise') < 0 && t.tete.indexOf('contact') < 0) { toast('Colonnes « Entreprise » et « Contact » introuvables : est-ce bien Suivi_Prospects.csv ?'); return; }
+    if (!t.lignes.length) { toast('Aucun prospect dans ce fichier : il ne contient que la ligne des titres.'); return; }
     let n = 0, m = 0, d = 0;
     t.lignes.forEach(l => {
       const nom = l['entreprise'] || l['contact'];
