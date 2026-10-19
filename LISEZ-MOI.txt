@@ -1,0 +1,58 @@
+════════════════════════════════════════════════════════════════════
+  APPLICATION D&B GESTION — dossier à héberger
+════════════════════════════════════════════════════════════════════
+
+Ce dossier est publié sur son PROPRE site Netlify, à l'adresse
+gestion.dbinformatique.cm (et non dans le site public). Le guide pas à pas
+est dans « 06_Applications\Integration_Gestion_Site.md ».
+
+CONTENU
+-------
+index.html            L'application complète (un seul fichier).
+sw.js                 Fonctionnement hors ligne. Ne pas renommer.
+manifest.webmanifest  Permet l'installation sur téléphone. Ne pas renommer.
+icone-192.png         Icône de l'application.
+icone-512.png         Icône de l'application.
+_headers              En-têtes de sécurité (Netlify). Ne pas supprimer.
+_redirects            Masque firestore.rules et ce fichier. Ne pas supprimer.
+robots.txt            Interdit l'indexation par les moteurs de recherche.
+404.html              Page affichée pour toute adresse inconnue.
+firestore.rules       Règles de sécurité à coller dans la console Firebase.
+                      Copie de référence, masquée sur Internet par _redirects.
+
+CE QUE FAIT L'APPLICATION
+-------------------------
+Clients, devis, factures, relances, contrats, interventions, prospection
+(avec le suivi des prospects) et, depuis octobre 2026 :
+  • Visites terrain : la liste des cibles (fichier Cibles_Terrain.csv),
+    la fiche de visite numérique et son aide-mémoire.
+  • Aide-mémoire : présentation de 30 secondes, accueil, objections,
+    règles et dix questions, consultables sur téléphone.
+  • Import / export des fichiers Cibles_Terrain.csv et Suivi_Prospects.csv
+    (séparateur « ; », UTF-8). L'application fait foi : les fichiers CSV
+    servent à échanger et à sauvegarder, pas à saisir en double.
+
+MISE EN LIGNE
+-------------
+Glisser-déposer le dossier ENTIER sur Netlify (les fichiers commençant par
+« _ » doivent y être). Détails, DNS et réglages Firebase : voir le guide.
+
+POINTS IMPORTANTS
+-----------------
+1. Le chiffrement des données ne fonctionne QU'EN HTTPS (règle des
+   navigateurs). Ouvert depuis un fichier du disque, le code d'accès ne peut
+   pas être activé. Netlify fournit le HTTPS gratuitement.
+
+2. Le contenu de ce dossier ne contient aucune donnée, aucun mot de passe,
+   aucun secret. Vos données sont soit sur votre appareil (chiffrées par
+   votre code d'accès), soit dans Firestore si vous activez la
+   synchronisation (protégées par la connexion et par les règles).
+
+3. Les fiches de visite et la liste des cibles sont des données de prospects :
+   activez le code d'accès (Paramètres) sur chaque téléphone avant de les
+   saisir, avec un verrouillage automatique court.
+
+4. Ne jamais copier ce dossier dans le dépôt du site public (site-web) : ses
+   règles de sécurité interdisent le script en ligne dont l'application a besoin.
+
+D&B Informatique — Yaoundé, Cameroun

@@ -1,0 +1,3 @@
+# Fichiers de référence qui n'ont pas à être lisibles depuis Internet.
+/firestore.rules   /404.html   404!
+/LISEZ-MOI.txt     /404.html   404!
