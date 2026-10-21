@@ -246,6 +246,10 @@ body.bloque #app,body.bloque #modal,body.bloque #toast{display:none!important}
 .onglets button.on{color:var(--encre);border-bottom-color:var(--indigo)}
 .zone{font-size:12px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;color:var(--indigo);margin:20px 0 8px}
 .lst{display:flex;flex-direction:column;gap:10px}
+.rech-vis{position:sticky;top:0;z-index:5;background:var(--fond,#F6F7FE);padding:10px 0;margin-bottom:4px;display:flex;flex-direction:column;gap:4px}
+.rech-vis input{width:100%;font-size:16px;padding:12px 14px;border:2px solid var(--indigo);border-radius:var(--r)}
+.vis-cherche .kpis,.vis-cherche .alert,.vis-cherche .onglets,.vis-cherche .toolbar{display:none}
+.vide-rech{background:var(--blanc);border:1px dashed var(--ligne);border-radius:var(--r);padding:16px;margin:10px 0}
 .lc{background:var(--blanc);border:1px solid var(--ligne);border-radius:var(--r);padding:13px 15px;display:flex;gap:14px;align-items:flex-start;box-shadow:var(--sh)}
 .lc .tx{flex:1;min-width:0}
 .lc .tt{font-weight:700;color:var(--encre);overflow-wrap:anywhere}
@@ -1763,7 +1767,7 @@ const MEMO = {
   ]
 };
 
-let VIS_ONGLET = 'cibles', VIS_TOURNEE = '', VIS_STATUT = 'a_visiter', VIS_SECTEUR = '';
+let VIS_ONGLET = 'cibles', VIS_TOURNEE = '', VIS_STATUT = 'a_visiter', VIS_SECTEUR = '', VIS_Q = '';
 
 /* Les listes ne sont pas dans DEFAUT : un tableau partagé entre DEFAUT et D serait modifié par erreur. */
 function cib() { if (!Array.isArray(D.cibles)) D.cibles = []; return D.cibles; }
@@ -1946,7 +1950,7 @@ function suiviExporter() {
 }
 
 /* ───────────────────────── page « Visites terrain » ───────────────────────── */
-function visOnglet(o) { VIS_ONGLET = o; router(); }
+function visOnglet(o) { VIS_ONGLET = o; VIS_Q = ''; router(); }
 function visFiltre() { VIS_TOURNEE = val('f_tour'); VIS_STATUT = val('f_stat') || 'a_visiter'; VIS_SECTEUR = val('f_sec'); router(); }
 
 function vVisites(v, a) {
@@ -1956,6 +1960,9 @@ function vVisites(v, a) {
   const dia = V.filter(x => x.issue === 'diagnostic' && (x.issueDate || '9999') >= auj()).length;
   const retard = V.filter(x => x.echeance && x.echeance <= auj() && !x.fait && x.issue !== 'pas_interesse').length;
   let h = '';
+  if (C.length || V.length) h += `<div class="rech-vis"><input type="search" id="visq" enterkeyhint="search" autocomplete="off"
+      placeholder="${VIS_ONGLET === 'fiches' ? 'Rechercher : établissement, contact…' : 'Rechercher : établissement, quartier…'}"
+      value="${esc(VIS_Q)}" oninput="visRecherche(this.value)"><span class="mini" id="visqn"></span></div>`;
   if (SEC.mode !== 'code' && (C.length || V.length)) h += `<div class="alert warn"><b>Aucun code d’accès sur cet appareil.</b>
     Les fiches de visite contiennent des coordonnées et des observations sur l’informatique des prospects.
     <a href="#parametres">Activez le code d’accès</a> avant de les saisir sur un téléphone.</div>`;
@@ -1970,7 +1977,36 @@ function vVisites(v, a) {
     <button class="${VIS_ONGLET === 'fiches' ? 'on' : ''}" onclick="visOnglet('fiches')">Fiches (${V.length})</button></div>`;
   h += VIS_ONGLET === 'fiches' ? visFiches(V) : visCibles(C);
   v.innerHTML = h;
+  visRecherche(VIS_Q);
 }
+
+/* Recherche sans re-rendu (le clavier du téléphone reste ouvert) : sans texte, la liste suit les filtres ;
+   avec un texte, la recherche porte sur toutes les cibles, quels que soient la tournée, le secteur et le statut. */
+function visRecherche(q) {
+  VIS_Q = q || '';
+  const mots = nrm(VIS_Q).split(' ').filter(Boolean);
+  const items = Array.from(document.querySelectorAll('#vue .lc[data-q]'));
+  let n = 0;
+  items.forEach(el => {
+    const ok = mots.length ? mots.every(m => el.dataset.q.includes(m)) : el.dataset.f !== '0';
+    el.style.display = ok ? '' : 'none';
+    if (ok) n++;
+  });
+  document.querySelectorAll('#vue .grp').forEach(g => {
+    g.style.display = g.querySelector('.lc[data-q]:not([style*="none"])') ? '' : 'none';
+  });
+  const vue = document.getElementById('vue');
+  if (vue) vue.classList.toggle('vis-cherche', mots.length > 0);
+  const cpt = document.getElementById('visqn');
+  if (cpt) cpt.textContent = mots.length ? n + ' résultat(s), toutes tournées et tous statuts' : '';
+  const rien = document.getElementById('visrien');
+  if (rien) {
+    rien.style.display = items.length && !n ? '' : 'none';
+    const b = document.getElementById('visnouv');
+    if (b) b.textContent = mots.length ? 'Nouvelle fiche pour « ' + VIS_Q.trim() + ' »' : 'Nouvelle fiche de visite';
+  }
+}
+function visNouvelleDepuisRecherche() { visForm('', '', VIS_Q.trim()); }
 
 function visCibles(C) {
   let h = `<div class="toolbar">
@@ -1991,18 +2027,20 @@ function visCibles(C) {
     return h + vide('Aucune cible. Importez le fichier Cibles_Terrain.csv (dossier Equipe_Numerique) : il est lu sur cet appareil et n’est envoyé nulle part, sauf si vous activez la synchronisation.');
   }
   const ordre = { '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, 'P': 6 };
-  const liste = C.filter(c => (!VIS_TOURNEE || c.tournee === VIS_TOURNEE) && (!VIS_SECTEUR || c.secteur === VIS_SECTEUR) &&
-      (VIS_STATUT === 'toutes' || (c.statut || 'À visiter') === 'À visiter'))
+  const filtre = c => (!VIS_TOURNEE || c.tournee === VIS_TOURNEE) && (!VIS_SECTEUR || c.secteur === VIS_SECTEUR) &&
+      (VIS_STATUT === 'toutes' || (c.statut || 'À visiter') === 'À visiter');
+  const liste = C.slice()
     .sort((x, y) => (ordre[x.tournee] || 9) - (ordre[y.tournee] || 9) || (Number(x.priorite) || 9) - (Number(y.priorite) || 9) || x.nom.localeCompare(y.nom, 'fr'));
-  if (!liste.length) return h + vide('Aucune cible ne correspond à ce filtre.');
+  h += visRien('Aucune cible ne correspond.');
   let cur = null;
   liste.forEach(c => {
     if (c.tournee !== cur) {
       cur = c.tournee;
-      h += `<div class="zone">${cur === 'P' ? 'Prescripteurs et partenaires' : 'Tournée ' + esc(cur || '—') + (TOURNEES[cur] ? ' — ' + esc(TOURNEES[cur]) : '')}</div><div class="lst">`;
+      h += `<div class="grp"><div class="zone">${cur === 'P' ? 'Prescripteurs et partenaires' : 'Tournée ' + esc(cur || '—') + (TOURNEES[cur] ? ' — ' + esc(TOURNEES[cur]) : '')}</div><div class="lst">`;
     }
     const st = c.statut || 'À visiter';
-    h += `<div class="lc"><div class="tx"><div class="tt">${esc(c.nom)}</div>
+    const cle = nrm([c.nom, c.repere, c.secteur, c.sousSecteur, c.angle, c.notes, c.decideur].filter(Boolean).join(' '));
+    h += `<div class="lc" data-q="${esc(cle)}" data-f="${filtre(c) ? 1 : 0}"><div class="tx"><div class="tt">${esc(c.nom)}</div>
       <div class="mt">${esc(c.secteur)}${c.sousSecteur ? ' · ' + esc(c.sousSecteur) : ''}${c.priorite && c.priorite !== '-' ? ' · priorité ' + esc(c.priorite) : ''}</div>
       ${c.repere ? `<div class="mt">${esc(c.repere)}</div>` : ''}
       ${c.angle ? `<div class="mt"><i>${esc(c.angle)}</i></div>` : ''}
@@ -2011,7 +2049,7 @@ function visCibles(C) {
       <button class="btn sm" onclick="visForm('', '${c.id}')">Fiche de visite</button>
       <button class="btn sec sm" onclick="cibForm('${c.id}')">Modifier</button></div></div>`;
     const suiv = liste[liste.indexOf(c) + 1];
-    if (!suiv || suiv.tournee !== cur) h += `</div>`;
+    if (!suiv || suiv.tournee !== cur) h += `</div></div>`;
   });
   return h;
 }
@@ -2053,14 +2091,19 @@ function cibSupprimer(id) {
   sauver(); fermer(); router(); toast('Cible supprimée');
 }
 
+function visRien(texte) {
+  return `<div id="visrien" class="vide-rech" style="display:none"><p>${esc(texte)} Vérifiez l’orthographe, ou créez la fiche directement.</p>
+    <button class="btn" id="visnouv" onclick="visNouvelleDepuisRecherche()">Nouvelle fiche de visite</button></div>`;
+}
 function visFiches(V) {
   let h = `<div class="toolbar"><div class="sp"></div>
     <button class="btn sec sm" onclick="cibExporter()">Exporter vers Cibles_Terrain.csv</button></div>`;
   if (!V.length) return h + vide('Aucune fiche de visite. Ouvrez une cible dans l’onglet « À visiter », ou créez une visite.',
     `<button class="btn" onclick="visForm()">Nouvelle visite</button>`);
-  h += `<div class="lst">` + V.slice().sort((x, y) => (y.date + (y.heure || '')).localeCompare(x.date + (x.heure || ''))).map(x => {
+  h += visRien('Aucune fiche ne correspond.') + `<div class="lst">` + V.slice().sort((x, y) => (y.date + (y.heure || '')).localeCompare(x.date + (x.heure || ''))).map(x => {
     const retard = x.echeance && x.echeance < auj() && !x.fait && x.issue !== 'pas_interesse';
-    return `<div class="lc"><div class="tx"><div class="tt">${esc(x.nom)}</div>
+    const cle = nrm([x.nom, x.contact, x.tel, x.mail, x.decideur, x.besoin, x.secteur].filter(Boolean).join(' '));
+    return `<div class="lc" data-q="${esc(cle)}"><div class="tx"><div class="tt">${esc(x.nom)}</div>
       <div class="mt">${fdate(x.date)}${x.heure ? ' à ' + esc(x.heure) : ''}${x.contact ? ' · ' + esc(x.contact) : ''}${x.tel ? ' · ' + esc(x.tel) : ''}</div>
       ${x.besoin ? `<div class="mt"><i>${esc(x.besoin.length > 140 ? x.besoin.slice(0, 140) + '…' : x.besoin)}</i></div>` : ''}
       ${x.action ? `<div class="mt">${x.fait ? '✓ ' : '→ '}${esc(x.action)}${x.echeance ? ' · ' + (retard ? '<b style="color:var(--rouge)">' + fdate(x.echeance) + '</b>' : fdate(x.echeance)) : ''}</div>` : ''}</div>
@@ -2071,10 +2114,10 @@ function visFiches(V) {
 }
 
 /* ───────────────────────── la fiche de visite ───────────────────────── */
-function visForm(id, cibleId) {
+function visForm(id, cibleId, nomLibre) {
   const ex = id ? vis().find(x => x.id === id) : null;
   const c = cibleId ? cib().find(q => q.id === cibleId) : (ex && ex.cibleId ? cib().find(q => q.id === ex.cibleId) : null);
-  const x = ex || { date: auj(), heure: new Date().toTimeString().slice(0, 5), nom: c ? c.nom : '', secteur: c ? c.secteur : '',
+  const x = ex || { date: auj(), heure: new Date().toTimeString().slice(0, 5), nom: c ? c.nom : (nomLibre || ''), secteur: c ? c.secteur : '',
     sousSecteur: c ? c.sousSecteur : '', tournee: c ? c.tournee : '', cibleId: c ? c.id : '', vu: {}, remis: {}, report: true };
   const vu = x.vu || {}, rm = x.remis || {};
   const noms = Array.from(new Set(cib().map(q => q.nom).concat(D.prospects.map(q => q.nom)).filter(Boolean)));
