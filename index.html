@@ -424,7 +424,7 @@ function vueDeverrouiller(msg) {
   ecranVerrou(`
     <h2>Application verrouillée</h2>
     <p class="vp">Saisissez votre code d'accès pour ouvrir vos données.</p>
-    <input id="vcode" type="password" inputmode="numeric" autocomplete="current-password"
+    <input id="vcode" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false"
            placeholder="Code d'accès" ${bloque ? 'disabled' : ''} onkeydown="if(event.key==='Enter')tenterDeverrouillage()">
     ${msg ? `<div class="verr">${esc(msg)}</div>` : ''}
     ${bloque ? `<div class="verr">Trop de tentatives. Réessayez dans <b id="vcompte">${reste}</b> secondes.</div>` : ''}
@@ -548,9 +548,9 @@ function activerCode() {
       ce code. <b>Si vous l'oubliez, personne — pas même nous — ne peut les récupérer.</b> Exportez une sauvegarde
       avant de continuer, et notez le code dans un endroit sûr.</div>
     <div class="champ"><label>Code d'accès — 6 caractères minimum</label>
-      <input id="c1" type="password" autocomplete="new-password" placeholder="Votre code"></div>
+      <input id="c1" type="password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Votre code"></div>
     <div class="champ"><label>Confirmation</label>
-      <input id="c2" type="password" autocomplete="new-password" placeholder="Le même code"></div>
+      <input id="c2" type="password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Le même code"></div>
     <div class="champ"><label>Verrouillage automatique après</label>
       <select id="c3">
         <option value="5">5 minutes d'inactivité</option>
